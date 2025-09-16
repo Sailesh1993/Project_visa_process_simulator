@@ -41,7 +41,7 @@ It uses a provided **simulation framework** (engine, event handling, distributio
 ---
 
 ## 📂 Project Structure
-
+```
 src/
 
 ├── simu/framework/     # Generic simulation engine (do not modify)
@@ -65,7 +65,7 @@ src/
 ├── test/   # Main simulation runner
 │ └── Simulator.java
   
----
+```
 
 ## 🚀 Getting Started
 
