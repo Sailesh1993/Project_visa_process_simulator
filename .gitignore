@@ -1,9 +1,0 @@
-# Default ignored files
-/shelf/
-/httpRequests/
-/dataSources/
-/dataSources.local.xml
-
-# IntelliJ IDEA files
-.idea/
-*.iml
