@@ -69,6 +69,8 @@ src/
 
 ## 🚀 Getting Started
 
+## Process Diagram
+[Link to process diagram] (https://lucid.app/lucidchart/a718b514-2885-440c-b49c-0978bccbd735/edit?invitationId=inv_ca18fbc7-496f-487b-bf73-3d2f65a2582f)
 
 ### 1. Clone the Repository
 ```bash
