@@ -13,9 +13,11 @@ public class ApplicationAsCustomer {
 	private int id;
 	private static int idCounter = 1;
 	private static long totalSystemTime = 0;
+    private static long totalApplications = 0;
 
     private boolean newApplication;
     private boolean docsComplete;
+    private boolean requiresBiometrics;
     private boolean approved;
     private EventType currentStage;
 
@@ -28,13 +30,15 @@ public class ApplicationAsCustomer {
 	    this.id = idCounter++;
         this.newApplication = newApplication;
         this.docsComplete = docsComplete;
+        this.requiresBiometrics = newApplication;       // Only new applications require biometrics
 		this.arrivalTime = Clock.getInstance().getClock();
         this.currentStage = EventType.ARRIVAL;
 
 		Trace.out(Trace.Level.INFO,
                 "New application #" + id + " arrived at  " + arrivalTime +
                 " | New application: " + newApplication +
-                " | Documents complete: " + docsComplete);
+                " | Documents complete: " + docsComplete +
+                " | Requires biometrics: " + requiresBiometrics);
 	}
 
     public int getId() {
@@ -69,6 +73,10 @@ public class ApplicationAsCustomer {
         this.docsComplete = docsComplete;
     }
 
+    public boolean requiresBiometrics() {
+        return requiresBiometrics;
+    }
+
     public boolean isApproved() {
         return approved;
     }
@@ -101,6 +109,12 @@ public class ApplicationAsCustomer {
         this.timeInWaitingRoom = time;
     }
 
+    public void markReapplication() {
+        this.newApplication = false;
+        this.requiresBiometrics = false;             // Reapplications do not require biometrics
+        this.currentStage = EventType.REAPPLICATION;
+    }
+
 	//Report the measured variables of the customer. In this case to the diagnostic output.
 
 	public void reportResults() {
@@ -111,10 +125,12 @@ public class ApplicationAsCustomer {
 
         Trace.out(Trace.Level.INFO,"Is this new application? " + newApplication);
         Trace.out(Trace.Level.INFO,"Are the required documents complete? " + docsComplete);
+        Trace.out(Trace.Level.INFO,"Is biometrics required? " + docsComplete);
         Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved" : "Denied"));
 
         totalSystemTime += (removalTime - arrivalTime);
-		double mean = totalSystemTime/id;
-		System.out.println("Current mean of the customer service times " + mean);
+        totalApplications++;
+		double mean = (double) totalSystemTime/totalApplications;
+		System.out.println("Current mean of the application service times: " + mean);
 	}
 }
