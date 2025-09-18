@@ -12,8 +12,8 @@ public class ApplicationAsCustomer {
 	private double removalTime;
 	private int id;
 	private static int idCounter = 1;
-	private static long totalSystemTime = 0;
-    private static long totalApplications = 0;
+	private static double totalSystemTime = 0;
+    private static double totalApplications = 0;
 
     private boolean newApplication;
     private boolean docsComplete;
@@ -125,12 +125,12 @@ public class ApplicationAsCustomer {
 
         Trace.out(Trace.Level.INFO,"Is this new application? " + newApplication);
         Trace.out(Trace.Level.INFO,"Are the required documents complete? " + docsComplete);
-        Trace.out(Trace.Level.INFO,"Is biometrics required? " + docsComplete);
+        Trace.out(Trace.Level.INFO,"Is biometrics required? " + requiresBiometrics);
         Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved" : "Denied"));
 
         totalSystemTime += (removalTime - arrivalTime);
         totalApplications++;
-		double mean = (double) totalSystemTime/totalApplications;
+		double mean = totalSystemTime/totalApplications;
 		System.out.println("Current mean of the application service times: " + mean);
 	}
 }
