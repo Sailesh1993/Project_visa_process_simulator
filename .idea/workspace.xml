@@ -5,8 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ddcd7af0-6d73-4514-9ad9-67be071bb39c" name="Changes" comment="Added process diagram link to LucidChart.">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/framework/ArrivalProcess.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/framework/Clock.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/framework/Engine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/framework/Event.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/framework/EventList.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/framework/IEventType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/framework/Trace.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simu_TextUI/src/simu/model/ApplicationAsCustomer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/model/ApplicationAsCustomer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -149,7 +156,7 @@
       <workItem from="1758178019015" duration="529000" />
       <workItem from="1758178581880" duration="165000" />
       <workItem from="1758178808505" duration="2187000" />
-      <workItem from="1758182565435" duration="6786000" />
+      <workItem from="1758182565435" duration="7474000" />
     </task>
     <task id="LOCAL-00001" summary="Added process diagram link to LucidChart.">
       <option name="closed" value="true" />
