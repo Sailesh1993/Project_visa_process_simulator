@@ -75,15 +75,17 @@ public class ServicePoint {
 	 * Inserts a new event to the event list when the service should be ready.
 	 */
 	public void beginService() {		// Begins a new service, customer is on the queue during the service
-		Trace.out(Trace.Level.INFO, "Starting a new service for the customer #" + queue.peek().getId());
-		reserved = true;
+		if (queue.isEmpty()) return;
         ApplicationAsCustomer a = queue.peek();
+        reserved = true;
+        // Calculate waiting time for this application
         double waitingTime = Clock.getInstance().getClock() - a.getArrivalTime();
         totalWaitingTime += waitingTime;
         lastServiceStart = Clock.getInstance().getClock();
-
-		double serviceTime = generator.sample();
-		eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getClock()+serviceTime));
+        // Schedule service completion event
+        double serviceTime = generator.sample();
+        eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getClock()+serviceTime));
+        Trace.out(Trace.Level.INFO,"SP(" +eventTypeScheduled +")Started a service for Application#" + a.getId() + "| waiting:" + waitingTime + "| service time" + serviceTime);
 	}
 
 	/**
@@ -114,6 +116,6 @@ public class ServicePoint {
         return maxQueueLength;
     }
     public double getUtilization(double simulationTime){
-        return busyTime / simulationTime;
+        return simulationTime > 0 ? busyTime / simulationTime: 0.0;
     }
 }
