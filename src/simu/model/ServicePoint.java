@@ -19,13 +19,20 @@ import java.util.LinkedList;
  * Service point collects measurement parameters.
  */
 public class ServicePoint {
+
 	private LinkedList<ApplicationAsCustomer> queue = new LinkedList<>(); // Data Structure used
 	private ContinuousGenerator generator;
 	private EventList eventList;
 	private EventType eventTypeScheduled;
-	//Queuestrategy strategy; // option: ordering of the customer(Application)
+	//QueueStrategy strategy; // option: ordering of the customer(Application)
 	private boolean reserved = false;
 
+    // Measurement variables
+    private int totalServed = 0;
+    private double totalWaitingTime = 0.0;
+    private int maxQueueLength = 0;
+    private double busyTime = 0.0; // Total time SP was busy.
+    private double lastServiceStart = 0.0; // for utilization tracking
 
 	/**
 	 * Create the service point with a waiting queue.
@@ -39,7 +46,6 @@ public class ServicePoint {
 		this.generator = generator;
 		this.eventTypeScheduled = type;
 	}
-
 	/**
 	 * Add a customer to the service point queue.
 	 *
@@ -47,6 +53,7 @@ public class ServicePoint {
 	 */
 	public void addQueue(ApplicationAsCustomer a) {	// The first customer of the queue is always in service
 		queue.add(a);
+        maxQueueLength = Math.max(maxQueueLength, queue.size());
 	}
 
 	/**
@@ -57,18 +64,24 @@ public class ServicePoint {
 	 */
 	public ApplicationAsCustomer removeQueue() {		// Remove serviced customer
 		reserved = false;
-		return queue.poll();
+        totalServed++;
+        ApplicationAsCustomer a = queue.poll();
+        busyTime += (Clock.getInstance().getClock() - lastServiceStart);
+		return a;
 	}
 
 	/**
 	 * Begins a new service, customer is on the queue during the service
-	 *
 	 * Inserts a new event to the event list when the service should be ready.
 	 */
 	public void beginService() {		// Begins a new service, customer is on the queue during the service
 		Trace.out(Trace.Level.INFO, "Starting a new service for the customer #" + queue.peek().getId());
-		
 		reserved = true;
+        ApplicationAsCustomer a = queue.peek();
+        double waitingTime = Clock.getInstance().getClock() - a.getArrivalTime();
+        totalWaitingTime += waitingTime;
+        lastServiceStart = Clock.getInstance().getClock();
+
 		double serviceTime = generator.sample();
 		eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getClock()+serviceTime));
 	}
@@ -85,9 +98,22 @@ public class ServicePoint {
 	/**
 	 * Check whether there is customers on the waiting queue
 	 *
-	 * @return logival value indicating queue status
+	 * @return logical value indicating queue status
 	 */
 	public boolean isOnQueue(){
-		return queue.size() != 0;
+		return !queue.isEmpty();
 	}
+    // Metrics getters
+    public int getTotalServed() {
+        return totalServed;
+    }
+    public double getAverageWaitingTime(){
+        return totalServed > 0 ? totalWaitingTime / totalServed : 0.0;
+    }
+    public int getMaxQueueLength(){
+        return maxQueueLength;
+    }
+    public double getUtilization(double simulationTime){
+        return busyTime / simulationTime;
+    }
 }
