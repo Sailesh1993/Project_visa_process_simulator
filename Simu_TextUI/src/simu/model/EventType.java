@@ -26,7 +26,6 @@ public enum EventType implements IEventType {
     // Description field for better debugging and logging
     private final String description;
 
-
     //Constructor for EventType enum
     EventType(String description) {
         this.description = description;
