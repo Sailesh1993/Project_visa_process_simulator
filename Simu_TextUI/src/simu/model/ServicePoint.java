@@ -33,7 +33,7 @@ public class ServicePoint {
     private double totalWaitingTime = 0.0;
     private int maxQueueLength = 0;
     private double busyTime = 0.0; // Total time SP was busy.
-    private double lastServiceStart = 0.0; // for utilization tracking
+    private double lastServiceStart = 0.0;              // for utilization tracking
 
     /**
      * Create the service point with a waiting queue.
