@@ -127,7 +127,7 @@ public class ApplicationAsCustomer {
         Trace.out(Trace.Level.INFO,"Is this new application? " + newApplication);
         Trace.out(Trace.Level.INFO,"Are the required documents complete? " + docsComplete);
         Trace.out(Trace.Level.INFO,"Is biometrics required? " + requiresBiometrics);
-        Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved✅" : "Denied❌"));
+        Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved ✅" : "Denied ❌"));
 
         totalSystemTime += (removalTime - arrivalTime);
         totalApplications++;
