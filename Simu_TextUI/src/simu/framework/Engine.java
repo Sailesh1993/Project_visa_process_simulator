@@ -42,7 +42,6 @@ public abstract class Engine {
 			
 			Trace.out(Trace.Level.INFO, "\nC-phase:" );
 			tryCEvents();
-
 		}
 
 		results();
