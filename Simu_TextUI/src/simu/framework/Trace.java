@@ -46,4 +46,8 @@ public class Trace {
 			System.out.println(txt);
 		}
 	}
+
+    public static String formatTime(double t) {
+        return String.format("%.2f", t);
+    }
 }

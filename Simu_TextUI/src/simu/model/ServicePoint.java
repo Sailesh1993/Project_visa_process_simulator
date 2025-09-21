@@ -86,7 +86,8 @@ public class ServicePoint {
         // Schedule service completion event
         double serviceTime = generator.sample();
         eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getClock()+serviceTime));
-        Trace.out(Trace.Level.INFO,"SP(" +eventTypeScheduled +")Started a service for Application#" + a.getId() + "| waiting:" + waitingTime + "| service time" + serviceTime);
+        Trace.out(Trace.Level.INFO,"SP(" + eventTypeScheduled + ")");
+        Trace.out(Trace.Level.INFO, "-->Started service for Application #" + a.getId() + "| Waiting time: " + Trace.formatTime(waitingTime) + "| Service time: " + Trace.formatTime(serviceTime));
     }
 
     /**

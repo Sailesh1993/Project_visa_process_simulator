@@ -2,7 +2,6 @@ package simu.model;
 
 import eduni.distributions.ContinuousGenerator;
 import eduni.distributions.Normal;
-import eduni.distributions.Uniform;
 import simu.framework.*;
 import eduni.distributions.Negexp;
 
@@ -24,21 +23,32 @@ public class MyEngine extends Engine {
 	public static final boolean FIXEDARRIVALTIMES = false;
 	public static final boolean FIXEDSERVICETIMES = false;
 
-	/**
+    private Random randomGenerator;
+
+    //counters
+    private int totalApplications = 0;
+    private int approvedCount = 0;
+    private int rejectedCount = 0;
+    private double totalSystemTime = 0.0;
+
+    private double[] totalWaitingTimePerSP;         //per-service point waiting times
+
+    /**
 	 * Service Points and random number generator with different distributions are created here.
 	 * We use exponent distribution for customer arrival times and normal distribution for the
 	 * service times.
 	 */
 	public MyEngine() {
 		servicePoints = new ServicePoint[6];
+        randomGenerator = new Random(System.currentTimeMillis());
+
+        totalWaitingTimePerSP = new double[servicePoints.length];
 
 		if (TEXTDEMO) {
 			/* special setup for the example in text
 			 * https://github.com/jacquesbergelius/PP-CourseMaterial/blob/master/1.1_Introduction_to_Simulation.md
 			 */
 			Random r = new Random();
-
-            ContinuousGenerator uniformGen = new Uniform(0.0, 1.0, System.currentTimeMillis());
 
 			ContinuousGenerator arrivalTime = null;
 			if (FIXEDARRIVALTIMES) {
@@ -125,15 +135,10 @@ public class MyEngine extends Engine {
 	protected void runEvent(Event t) {  // B phase events
         ApplicationAsCustomer application;
 
-        // Define eduni uniform generators (seeds for reproducibility)
-        ContinuousGenerator newAppGen = new Uniform(0.0, 1.0, 12345L);
-        ContinuousGenerator docsGen = new Uniform(0.0, 1.0, 67890L);
-        ContinuousGenerator approvalGen = new Uniform(0.0, 1.0, 13579L);
-
         switch ((EventType) t.getType()) {
             case ARRIVAL:
-                boolean isNew = newAppGen.sample() < 0.65;      //65% chance of being a new application
-                boolean docsComplete = newAppGen.sample() < 0.8;        //80% chance of having all documents complete
+                boolean isNew = randomGenerator.nextDouble() < 0.65;      //65% chance of being a new application
+                boolean docsComplete = randomGenerator.nextDouble() < 0.8;        //80% chance of having all documents complete
                 servicePoints[0].addQueue(new ApplicationAsCustomer(isNew, docsComplete));
                 arrivalProcess.generateNextEvent();
                 break;
@@ -173,17 +178,21 @@ public class MyEngine extends Engine {
                 application = servicePoints[5].removeQueue();
                 application.setRemovalTime(Clock.getInstance().getClock());
 
-                boolean approved = approvalGen.sample() < 0.7; // 70% chance of approval
+                boolean approved = randomGenerator.nextDouble() < 0.7; // 70% chance of approval
                 application.setApproved(approved);
 
-                application.reportResults();
-
+                totalApplications++;
                 // Schedule exit events
                 if (approved) {
                     eventList.add(new Event(EventType.EXIT_APPROVED, Clock.getInstance().getClock()));
+                    approvedCount++;
                 } else {
                     eventList.add(new Event(EventType.EXIT_REJECTED, Clock.getInstance().getClock()));
+                    rejectedCount++;
                 }
+
+                totalSystemTime += application.getRemovalTime() + application.getArrivalTime();
+                application.reportResults();
                 break;
 
             case EXIT_APPROVED:
@@ -204,7 +213,15 @@ public class MyEngine extends Engine {
 
 	@Override
 	protected void results() {
-		System.out.println("Simulation ended at " + Clock.getInstance().getClock());
-		System.out.println("Results ... are currently missing");
+
+        double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
+        System.out.println();
+        System.out.println("------------------------------------------------------------------------------");
+        System.out.printf("Simulation ended at %.2f%n", Clock.getInstance().getClock());
+        System.out.println("****** Simulation Results ******");
+        System.out.println("Total applications processed: " + totalApplications);
+        System.out.println("Approved applications: " + approvedCount);
+        System.out.println("Rejected applications: " + rejectedCount);
+        System.out.printf("Average time in system: %.2f%n", avgTimeInSystem);
 	}
 }

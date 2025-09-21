@@ -34,7 +34,7 @@ public abstract class Engine {
 		initialize(); // creating, e.g., the first event
 
 		while (simulate()) {
-			Trace.out(Trace.Level.INFO, "\nA-phase: time is " + currentTime());
+			Trace.out(Trace.Level.INFO, "\nA-phase: time is " + Trace.formatTime(currentTime()));
 			clock.setClock(currentTime());
 			
 			Trace.out(Trace.Level.INFO, "\nB-phase:" );

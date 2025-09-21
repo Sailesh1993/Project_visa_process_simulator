@@ -3,25 +3,25 @@ import simu.framework.IEventType;
 
 public enum EventType implements IEventType {
 
-    ARRIVAL("Application arrives in system"),
+    ARRIVAL("Application arrives in system!"),
 
-    END_APPLICATION_ENTRY("Application entry and appointment booking completed"),
+    END_APPLICATION_ENTRY("Application entry and appointment booking completed."),
 
-    END_DOC_SUBMISSION("Document submission and interview completed"),
+    END_DOC_SUBMISSION("Document submission and interview completed."),
 
-    END_BIOMETRICS("Biometrics collection completed"),
+    END_BIOMETRICS("Biometrics collection completed."),
 
-    END_DOC_CHECK("Document verification and background check completed"),
+    END_DOC_CHECK("Document verification and background check completed."),
 
-    END_DECISION("Decision room processing completed"),
+    END_DECISION("Decision room processing completed."),
 
-    MISSING_DOCS_RESOLVED("Missing documents provided and resolved"),
+    MISSING_DOCS_RESOLVED("Missing documents provided and resolved."),
 
-    REAPPLICATION("Application resubmitted after rejection"),
+    REAPPLICATION("Application resubmitted after rejection."),
 
-    EXIT_APPROVED("Application approved and exited system"),
+    EXIT_APPROVED("Application approved and exited system."),
 
-    EXIT_REJECTED("Application rejected and exited system");
+    EXIT_REJECTED("Application rejected and exited system.");
 
     // Description field for better debugging and logging
     private final String description;

@@ -18,7 +18,9 @@ public class Simulator {
 		Trace.setTraceLevel(Level.INFO);
 
 		Engine m = new MyEngine();
-		m.setSimulationTime(1000);
+        System.out.println("Starting simulation.....");
+
+        m.setSimulationTime(1000);
 		m.run();
 	}
 }

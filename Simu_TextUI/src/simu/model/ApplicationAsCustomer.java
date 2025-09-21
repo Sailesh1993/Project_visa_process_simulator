@@ -34,11 +34,12 @@ public class ApplicationAsCustomer {
 		this.arrivalTime = Clock.getInstance().getClock();
         this.currentStage = EventType.ARRIVAL;
 
-		Trace.out(Trace.Level.INFO,
-                "New application #" + id + " arrived at  " + arrivalTime +
-                " | New application: " + newApplication +
-                " | Documents complete: " + docsComplete +
-                " | Requires biometrics: " + requiresBiometrics);
+		Trace.out(Trace.Level.INFO, "New application #" + id + " arrived at " + Trace.formatTime(arrivalTime));
+        Trace.out(Trace.Level.INFO,
+                "Checking.... New application? " + newApplication +
+                        " | Requires biometrics? " + requiresBiometrics +
+                " | Complete documents? " + docsComplete
+        );
 	}
 
     public int getId() {
@@ -118,15 +119,15 @@ public class ApplicationAsCustomer {
 	//Report the measured variables of the customer. In this case to the diagnostic output.
 
 	public void reportResults() {
-		Trace.out(Trace.Level.INFO, "\nApplication " + id + " is processed! ");
-		Trace.out(Trace.Level.INFO, "Application " + id + " arrived: " + arrivalTime);
-		Trace.out(Trace.Level.INFO,"Application " + id + " removed: " + removalTime);
+		Trace.out(Trace.Level.INFO, "\nApplication #" + id + " is processed! ");
+		Trace.out(Trace.Level.INFO, "Application #" + id + " arrived at " + arrivalTime);
+		Trace.out(Trace.Level.INFO,"Application " + id + " removed at " + removalTime);
         Trace.out(Trace.Level.INFO,"Total time in system: " + id + " "  + (removalTime - arrivalTime));
 
         Trace.out(Trace.Level.INFO,"Is this new application? " + newApplication);
         Trace.out(Trace.Level.INFO,"Are the required documents complete? " + docsComplete);
         Trace.out(Trace.Level.INFO,"Is biometrics required? " + requiresBiometrics);
-        Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved" : "Denied"));
+        Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved✅" : "Denied❌"));
 
         totalSystemTime += (removalTime - arrivalTime);
         totalApplications++;
