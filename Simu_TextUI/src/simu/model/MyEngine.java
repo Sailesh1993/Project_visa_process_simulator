@@ -216,7 +216,7 @@ public class MyEngine extends Engine {
 
         double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
         System.out.println();
-        System.out.println("------------------------------------------------------------------------------");
+        System.out.println("*---------------------------------------------------------------------------------*");
         System.out.printf("Simulation ended at %.2f%n", Clock.getInstance().getClock());
         System.out.println("****** Simulation Results ******");
         System.out.println("Total applications processed: " + totalApplications);
