@@ -41,6 +41,7 @@ public class Trace {
 	 * @param lvl severity level of the diagnostic message
 	 * @param txt diagnostic message to be printed
 	 */
+
 	public static void out(Level lvl, String txt) {
 		if (lvl.ordinal() >= traceLevel.ordinal()) {
 			System.out.println(txt);
