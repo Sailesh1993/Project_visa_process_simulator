@@ -28,6 +28,7 @@ public class EventList {
 	 *
 	 * @param t Event to be inserted to the list
 	 */
+
 	public void add(Event t) {
 		Trace.out(Trace.Level.INFO,"Adding to the event list " + t.getType() + " " + Trace.formatTime(t.getTime()));
 		eventlist.add(t);
