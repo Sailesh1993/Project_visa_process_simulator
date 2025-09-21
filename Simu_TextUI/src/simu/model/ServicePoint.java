@@ -86,8 +86,8 @@ public class ServicePoint {
         // Schedule service completion event
         double serviceTime = generator.sample();
         eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getClock()+serviceTime));
-        Trace.out(Trace.Level.INFO,"SP(" + eventTypeScheduled + ")");
-        Trace.out(Trace.Level.INFO, "-->Started service for Application #" + a.getId() + "| Waiting time: " + Trace.formatTime(waitingTime) + "| Service time: " + Trace.formatTime(serviceTime));
+        Trace.out(Trace.Level.INFO,"Service Point(" + eventTypeScheduled + ")");
+        Trace.out(Trace.Level.INFO, "-->Started service for Application #" + a.getId() + " | Waiting time: " + Trace.formatTime(waitingTime) + " | Service time: " + Trace.formatTime(serviceTime));
     }
 
     /**
@@ -111,12 +111,18 @@ public class ServicePoint {
     public int getTotalServed() {
         return totalServed;
     }
+
+
     public double getAverageWaitingTime(){
         return totalServed > 0 ? totalWaitingTime / totalServed : 0.0;
     }
+
+    //
     public int getMaxQueueLength(){
         return maxQueueLength;
     }
+
+    //how much time individual customer spent time in service point?
     public double getUtilization(double simulationTime){
         return simulationTime > 0 ? busyTime / simulationTime: 0.0;
     }
