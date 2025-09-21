@@ -19,7 +19,7 @@ public class EventList {
 	 * @return The next event, null is the event list is empty
 	 */
 	public Event remove() {
-		Trace.out(Trace.Level.INFO,"Removing from the event list " + eventlist.peek().getType() + " " + eventlist.peek().getTime());
+		Trace.out(Trace.Level.INFO,"Removing from the event list " + eventlist.peek().getType() + " " + Trace.formatTime(eventlist.peek().getTime()));
 		return eventlist.remove();
 	}
 
@@ -28,8 +28,9 @@ public class EventList {
 	 *
 	 * @param t Event to be inserted to the list
 	 */
+
 	public void add(Event t) {
-		Trace.out(Trace.Level.INFO,"Adding to the event list " + t.getType() + " " + t.getTime());
+		Trace.out(Trace.Level.INFO,"Adding to the event list " + t.getType() + " " + Trace.formatTime(t.getTime()));
 		eventlist.add(t);
 	}
 

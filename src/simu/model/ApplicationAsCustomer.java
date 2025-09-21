@@ -7,17 +7,19 @@ import simu.framework.*;
  *
  * TODO: This is to be implemented according to the requirements of the simulation model (data!)
  */
-public class Customer {
+public class ApplicationAsCustomer {
 	private double arrivalTime;
 	private double removalTime;
 	private int id;
 	private static int i = 1;
 	private static long sum = 0;
+    private String type;
+    private String status;
 
 	/**
 	 * Create a unique customer
 	 */
-	public Customer() {
+	public ApplicationAsCustomer() {
 	    id = i++;
 	    
 		arrivalTime = Clock.getInstance().getClock();
