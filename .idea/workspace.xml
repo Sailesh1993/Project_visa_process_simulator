@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ddcd7af0-6d73-4514-9ad9-67be071bb39c" name="Changes" comment="Added process diagram link to LucidChart.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simu_TextUI/src/simu/model/ServicePoint.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simu_TextUI/src/simu/model/ServicePoint.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +152,7 @@
       <workItem from="1758268397835" duration="408000" />
       <workItem from="1758463709939" duration="1375000" />
       <workItem from="1758465107705" duration="1049000" />
-      <workItem from="1758466177276" duration="337000" />
+      <workItem from="1758466177276" duration="6667000" />
     </task>
     <task id="LOCAL-00001" summary="Added process diagram link to LucidChart.">
       <option name="closed" value="true" />
