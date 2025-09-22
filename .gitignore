@@ -8,3 +8,7 @@
 .idea/
 *.iml
 .idea/workspace.xml
+*.log
+# Ignore compiled Java classes
+/out/
+*.class
