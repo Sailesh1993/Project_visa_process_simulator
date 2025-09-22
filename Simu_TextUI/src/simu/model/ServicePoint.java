@@ -26,14 +26,15 @@ public class ServicePoint {
     private EventList eventList;
     private EventType eventTypeScheduled;
     //QueueStrategy strategy; // option: ordering of the customer(Application)
-    private boolean reserved = false;
+    private boolean reserved  = false;
 
     // Measurement variables
-    private int totalServed = 0;
+    private int totalDepartures = 0;
     private double totalWaitingTime = 0.0;
     private int maxQueueLength = 0;
     private double busyTime = 0.0; // Total time SP was busy.
     private double lastServiceStart = 0.0;              // for utilization tracking
+    private int numEmployees = 1;
 
     /**
      * Create the service point with a waiting queue.
@@ -47,14 +48,29 @@ public class ServicePoint {
         this.generator = generator;
         this.eventTypeScheduled = type;
     }
+
+    public String getServicePointName() {
+        switch (eventTypeScheduled) {
+            case END_APPLICATION_ENTRY: return "Application Entry & Appointment Booking";
+            case END_DOC_SUBMISSION: return "Document Submission & Interview";
+            case END_BIOMETRICS: return "Biometrics Collection";
+            case MISSING_DOCS_RESOLVED: return "Missing Documents Resolution";
+            case END_DOC_CHECK: return "Document Verification & Background Check";
+            case END_DECISION: return "Decision Room";
+            default: return "Unknown Service Point";
+        }
+    }
+
     /**
      * Add a customer to the service point queue.
      *
      * @param a Customer to be queued
      */
     public void addQueue(ApplicationAsCustomer a) {	// The first customer of the queue is always in service
+        a.setTimeEnteredQueue(Clock.getInstance().getClock());
         queue.add(a);
         maxQueueLength = Math.max(maxQueueLength, queue.size());
+        checkBottleneck();
     }
 
     /**
@@ -64,11 +80,28 @@ public class ServicePoint {
      * @return Customer retrieved from the waiting queue
      */
     public ApplicationAsCustomer removeQueue() {		// Remove serviced customer
+        if (queue.isEmpty()) return null;
+
+        ApplicationAsCustomer application = queue.poll();
         reserved = false;
-        totalServed++;
-        ApplicationAsCustomer a = queue.poll();
-        busyTime += (Clock.getInstance().getClock() - lastServiceStart);
-        return a;
+        totalDepartures++;
+
+        double now = Clock.getInstance().getClock();
+
+        // Accumulate busy time only for the period the service was actually active
+        if (lastServiceStart > 0) {
+            double serviceDuration = now - lastServiceStart;
+            if (serviceDuration > 0) {
+                busyTime += serviceDuration;
+            }
+            lastServiceStart = 0;                   // reset for next service
+        }
+
+        Trace.out(Trace.Level.INFO, "Service Point " + "\"" + getServicePointName() + "\"" +
+                " --> Completed service for Application #" + application.getId() +
+                " | Total departures: " + totalDepartures);
+
+        return application;
     }
 
     /**
@@ -77,17 +110,34 @@ public class ServicePoint {
      */
     public void beginService() {		// Begins a new service, customer is on the queue during the service
         if (queue.isEmpty()) return;
-        ApplicationAsCustomer a = queue.peek();
+
+        ApplicationAsCustomer application = queue.peek();
         reserved = true;
-        // Calculate waiting time for this application
-        double waitingTime = Clock.getInstance().getClock() - a.getArrivalTime();
+
+        //calculate waiting time for this application
+        double waitingTime = Clock.getInstance().getClock() - application.getTimeEnteredQueue();
         totalWaitingTime += waitingTime;
-        lastServiceStart = Clock.getInstance().getClock();
-        // Schedule service completion event
+        application.setTimeInWaitingRoom(waitingTime);
+
+        maxQueueLength = Math.max(maxQueueLength, queue.size());        //Track max queue length
+
+        // Get service time sample and clamp so it's never negative or zero
         double serviceTime = generator.sample();
+        serviceTime = Math.max(1e-6, serviceTime);
+
+        lastServiceStart = Clock.getInstance().getClock();              //Track when service starts for utilization tracking
+
+        // Schedule service completion event
         eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getClock()+serviceTime));
-        Trace.out(Trace.Level.INFO,"Service Point(" + eventTypeScheduled + ")");
-        Trace.out(Trace.Level.INFO, "-->Started service for Application #" + a.getId() + " | Waiting time: " + Trace.formatTime(waitingTime)  + " minutes" + " | Service time: " + Trace.formatTime(serviceTime) + " minutes" );
+        Trace.out(Trace.Level.INFO,"At Service Point " + "\"" + getServicePointName() + "\":");
+        Trace.out(Trace.Level.INFO, "-->Started service for Application #" + application.getId() + " | Waiting time: " + Trace.formatTime(waitingTime)  + " minutes" + " | Service time: " + Trace.formatTime(serviceTime) + " minutes" );
+
+        // Safe employee adjustment based on queue size
+        int desiredEmployees = Math.min(Math.max(1, queue.size()), 10);                     // 1 to 10 employees
+        if (numEmployees != desiredEmployees) {
+            adjustEmployees(desiredEmployees);
+            Trace.out(Trace.Level.INFO, "*Number of employees adjusted due to queue demand: " + queue.size());
+        }
     }
 
     /**
@@ -107,23 +157,39 @@ public class ServicePoint {
     public boolean isOnQueue(){
         return !queue.isEmpty();
     }
-    // Metrics getters
-    public int getTotalServed() {
-        return totalServed;
-    }
 
+    // Metrics getters
+    public int getTotalDepartures() {
+        return totalDepartures;
+    }
 
     public double getAverageWaitingTime(){
-        return totalServed > 0 ? totalWaitingTime / totalServed : 0.0;
+        return totalDepartures > 0 ? totalWaitingTime / totalDepartures : 0.0;
     }
 
-    //
+    //Track queue length
     public int getMaxQueueLength(){
         return maxQueueLength;
     }
 
-    //how much time individual customer spent time in service point?
+    //Method to track utilization (percentage of busy time)
     public double getUtilization(double simulationTime){
-        return simulationTime > 0 ? busyTime / simulationTime: 0.0;
+        return simulationTime > 0 ? (busyTime / simulationTime) * 100 : 0.0;
+    }
+
+    public int getNumEmployees() {
+        return numEmployees;
+    }
+
+    public void adjustEmployees(int newEmployeeCount) {
+        this.numEmployees = Math.max(1, newEmployeeCount);
+        Trace.out(Trace.Level.INFO, "ServicePoint " + getServicePointName() + " adjusted employees to " + this.numEmployees);
+    }
+
+    public void checkBottleneck() {
+        if (queue.size() > 15) {
+            Trace.out(Trace.Level.WAR, "Bottleneck detected at Service Point " + getServicePointName() + " (Queue length: " + queue.size() + ").");
+            adjustEmployees(numEmployees + 1);
+        }
     }
 }
