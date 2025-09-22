@@ -19,7 +19,7 @@ public class Simulator {
 
 		Engine m = new MyEngine();
 
-        System.out.println("Starting simulation.....");
+        System.out.println("......Starting simulation......");
 
         m.setSimulationTime(1000);
 		m.run();
