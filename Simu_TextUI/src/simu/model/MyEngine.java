@@ -31,8 +31,6 @@ public class MyEngine extends Engine {
     private int rejectedCount = 0;
     private double totalSystemTime = 0.0;
 
-    private double[] totalWaitingTimePerSP;         //per-service point waiting times
-
     /**
 	 * Service Points and random number generator with different distributions are created here.
 	 * We use exponent distribution for customer arrival times and normal distribution for the
@@ -41,8 +39,6 @@ public class MyEngine extends Engine {
 	public MyEngine() {
 		servicePoints = new ServicePoint[6];
         randomGenerator = new Random(System.currentTimeMillis());
-
-        totalWaitingTimePerSP = new double[servicePoints.length];
 
 		if (TEXTDEMO) {
 			/* special setup for the example in text
@@ -129,7 +125,8 @@ public class MyEngine extends Engine {
 	@Override
 	protected void initialize() {	// First arrival in the system
 		arrivalProcess.generateNextEvent();
-	}
+        Trace.setTraceLevel(Trace.Level.INFO);          // to ensure INFO messages are printed
+    }
 
 	@Override
 	protected void runEvent(Event t) {  // B phase events
@@ -145,7 +142,9 @@ public class MyEngine extends Engine {
 
             case END_APPLICATION_ENTRY:             // SP1 done, move to SP2
                 application = servicePoints[0].removeQueue();
+                application.setCurrentStage(EventType.END_DOC_SUBMISSION);
                 servicePoints[1].addQueue(application);
+                Trace.out(Trace.Level.INFO, "Application #" + application.getId() + " has entered Service Point 1.");
                 break;
 
             case END_DOC_SUBMISSION:                                // SP1 done, move to SP4 or SP3 or SP2
@@ -157,10 +156,16 @@ public class MyEngine extends Engine {
                 } else {
                     servicePoints[4].addQueue(application);         // Move to SP4: Document Check
                 }
+                Trace.out(Trace.Level.INFO,"Application #" + application.getId() + " has moved to Service Point 2.");
                 break;
 
             case END_BIOMETRICS:
                 application = servicePoints[2].removeQueue();
+
+                if (application.requiresBiometrics()) {
+                    double timeInBiometrics = Clock.getInstance().getClock() - application.getTimeEnteredQueue();
+                    application.setTimeInBiometrics(timeInBiometrics);
+                }
                 servicePoints[4].addQueue(application);             // move to Doc Check
                 break;
 
@@ -182,32 +187,37 @@ public class MyEngine extends Engine {
                 application.setApproved(approved);
 
                 totalApplications++;
-                // Schedule exit events
-                if (approved) {
-                    eventList.add(new Event(EventType.EXIT_APPROVED, Clock.getInstance().getClock()));
-                    approvedCount++;
-                } else {
-                    eventList.add(new Event(EventType.EXIT_REJECTED, Clock.getInstance().getClock()));
-                    rejectedCount++;
-                }
+                if (approved) approvedCount++;
+                else rejectedCount++;
 
-                totalSystemTime += application.getRemovalTime() + application.getArrivalTime();
+                totalSystemTime += application.getRemovalTime() - application.getArrivalTime();
+
+                // Schedule exit
+                EventType exitEvent = approved ? EventType.EXIT_APPROVED : EventType.EXIT_REJECTED;
+                eventList.add(new Event(exitEvent, Clock.getInstance().getClock()));
+
                 application.reportResults();
+
+                // Handle reapplication for rejected applications
+                if (!approved) {
+                    application.markReapplication();
+                    servicePoints[0].addQueue(application);
+                }
                 break;
 
             case EXIT_APPROVED:
             case EXIT_REJECTED:
-                // Customer leaves system, stats already collected
                 break;
         }
     }
 
 	@Override
 	protected void tryCEvents() {
-		for (ServicePoint p: servicePoints){
-			if (!p.isReserved() && p.isOnQueue()){
-				p.beginService();
+		for (ServicePoint servicePoint: servicePoints){
+			if (!servicePoint.isReserved() && servicePoint.isOnQueue()){
+                servicePoint.beginService();
 			}
+            servicePoint.checkBottleneck();
 		}
 	}
 
@@ -215,13 +225,26 @@ public class MyEngine extends Engine {
 	protected void results() {
 
         double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
+
         System.out.println();
         System.out.println("*---------------------------------------------------------------------------------*");
         System.out.printf("Simulation ended at %.2f%n", Clock.getInstance().getClock());
         System.out.println("****** Simulation Results ******");
-        System.out.println("Total applications processed: " + totalApplications);
-        System.out.println("Approved applications: " + approvedCount);
-        System.out.println("Rejected applications: " + rejectedCount);
-        System.out.printf("Average time in system: %.2f%n", avgTimeInSystem);
-	}
+        System.out.println("  -> Total applications processed: " + totalApplications + " applications.");
+        System.out.println("  -> Approved applications: " + approvedCount + " applications");
+        System.out.println("  -> Rejected applications: " + rejectedCount + " applications");
+        System.out.printf("  -> Average time in system: %.2f minutes.%n", avgTimeInSystem);
+
+        System.out.println("\n****** Service Point Performances ******");
+        for (int i = 0; i < servicePoints.length; i++) {
+            ServicePoint servicePoint = servicePoints[i];
+            System.out.println("Service Point " + (i + 1) + " \"" + servicePoint.getServicePointName() + "\"" + " Metrics:");
+            System.out.println("  -> Total departures: " + servicePoint.getTotalDepartures() + " applications.");
+            System.out.println("  -> Average waiting time: " + Trace.formatTime(servicePoint.getAverageWaitingTime()) + " minutes");
+            System.out.println("  -> Max queue length: " + servicePoint.getMaxQueueLength() + " applications");
+            System.out.println("  -> Utilization: " + Trace.formatTime(servicePoint.getUtilization(Clock.getInstance().getClock())) + " %");
+            System.out.println("  -> Number of employees: " + servicePoint.getNumEmployees());
+            System.out.println();
+        }
+    }
 }
