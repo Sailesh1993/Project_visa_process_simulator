@@ -12,8 +12,6 @@ public class ApplicationAsCustomer {
 	private double removalTime;
 	private int id;
 	private static int idCounter = 1;
-	private static double totalSystemTime = 0;
-    private static double totalApplications = 0;
 
     private boolean newApplication;
     private boolean docsComplete;
@@ -23,6 +21,7 @@ public class ApplicationAsCustomer {
 
     private double timeInBiometrics;
     private double timeInWaitingRoom;
+    private double timeEnteredQueue = -1.0;         //timestamp for waiting time measurement
 
 	//Create a unique customer
 
@@ -50,17 +49,11 @@ public class ApplicationAsCustomer {
         return arrivalTime;
     }       //Get customer arrival time for simulation
 
-	public double getRemovalTime() {
-		return removalTime;
-	}           // Get time when customer has been removed (from the system to be simulated)
+	public double getRemovalTime() {return removalTime;}         // Get time when customer has been removed (from the system to be simulated)
 
-	public void setRemovalTime(double removalTime) {
-		this.removalTime = removalTime;
-	}           //Mark the time when the customer has been removed (from the system to be simulated)
+	public void setRemovalTime(double removalTime) {this.removalTime = removalTime;}           //Mark the time when the customer has been removed (from the system to be simulated)
 
-	public void setArrivalTime(double arrivalTime) {
-		this.arrivalTime = arrivalTime;
-	}           //Mark the time when the customer arrived to the system to be simulated
+	public void setArrivalTime(double arrivalTime) {this.arrivalTime = arrivalTime;}           //Mark the time when the customer arrived to the system to be simulated
 
 	public boolean isNewApplication() {
         return newApplication;
@@ -110,6 +103,10 @@ public class ApplicationAsCustomer {
         this.timeInWaitingRoom = time;
     }
 
+    public void setTimeEnteredQueue(double t) { this.timeEnteredQueue = t; }
+
+    public double getTimeEnteredQueue() { return timeEnteredQueue; }
+
     public void markReapplication() {
         this.newApplication = false;
         this.requiresBiometrics = false;             // Reapplications do not require biometrics
@@ -120,18 +117,18 @@ public class ApplicationAsCustomer {
 
 	public void reportResults() {
 		Trace.out(Trace.Level.INFO, "\nApplication #" + id + " is processed! ");
-		Trace.out(Trace.Level.INFO, "Application #" + id + " arrived at " + arrivalTime);
-		Trace.out(Trace.Level.INFO,"Application " + id + " removed at " + removalTime);
-        Trace.out(Trace.Level.INFO,"Total time in system: " + id + " "  + (removalTime - arrivalTime));
+		Trace.out(Trace.Level.INFO, "Application #" + id + " arrived at " + Trace.formatTime(arrivalTime));
+		Trace.out(Trace.Level.INFO,"Application #" + id + " removed at " + Trace.formatTime(removalTime));
+        Trace.out(Trace.Level.INFO,"Total time in system: " + id + " "  + Trace.formatTime((removalTime - arrivalTime)));
+        Trace.out(Trace.Level.INFO,"Application waited " + Trace.formatTime(getTimeInWaitingRoom()) + " minutes in queue.");
+
+        if (requiresBiometrics) {
+            Trace.out(Trace.Level.INFO, "Time spent in biometrics: " + Trace.formatTime(getTimeInBiometrics()) + " minutes");
+        }
 
         Trace.out(Trace.Level.INFO,"Is this new application? " + newApplication);
         Trace.out(Trace.Level.INFO,"Are the required documents complete? " + docsComplete);
         Trace.out(Trace.Level.INFO,"Is biometrics required? " + requiresBiometrics);
         Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved ✅" : "Denied ❌"));
-
-        totalSystemTime += (removalTime - arrivalTime);
-        totalApplications++;
-		double mean = totalSystemTime/totalApplications;
-		System.out.println("Current mean of the application service times: " + mean);
 	}
 }
