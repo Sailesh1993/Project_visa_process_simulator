@@ -3,7 +3,6 @@ package simu.model;
 import simu.framework.Clock;
 import simu.framework.Trace;
 
-
 // TODO:
 // ApplicationAsCustomer to be implemented according to the requirements of the simulation model (data!)
 public class ApplicationAsCustomer {
