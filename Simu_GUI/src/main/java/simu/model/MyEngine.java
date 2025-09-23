@@ -31,29 +31,29 @@ public class MyEngine extends Engine {
 
 	@Override
 	protected void runEvent(Event t) {  // B phase events
-		Customer a;
+		ApplicationAsCustomer application;
 
 		switch ((EventType)t.getType()){
 		case ARR1:
-			servicePoints[0].addQueue(new Customer());
+			servicePoints[0].addQueue(new ApplicationAsCustomer());
 			arrivalProcess.generateNext();
 			controller.visualiseCustomer(); // NEW
 			break;
 
 		case DEP1:
-			a = servicePoints[0].removeQueue();
-			 servicePoints[1].addQueue(a);
+            application = servicePoints[0].removeQueue();
+			 servicePoints[1].addQueue(application);
 			break;
 
 		case DEP2:
-			a = servicePoints[1].removeQueue();
-			servicePoints[2].addQueue(a);
+            application = servicePoints[1].removeQueue();
+			servicePoints[2].addQueue(application);
 			break;
 
 		case DEP3:
-			a = servicePoints[2].removeQueue();
-			a.setRemovalTime(Clock.getInstance().getTime());
-			a.reportResults();
+            application = servicePoints[2].removeQueue();
+            application.setRemovalTime(Clock.getInstance().getTime());
+            application.reportResults();
 			break;
 		}	
 	}
