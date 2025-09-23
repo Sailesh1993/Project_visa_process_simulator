@@ -9,8 +9,8 @@ public class Visualisation2 extends Canvas implements IVisualisation {
 	private GraphicsContext gc;
 	int customerCount = 0;
 
-	public Visualisation2(int w, int h) {
-		super(w, h);
+	public Visualisation2(int width, int height) {
+		super(width, height);
 		gc = this.getGraphicsContext2D();
 		clearDisplay();
 	}
@@ -27,6 +27,6 @@ public class Visualisation2 extends Canvas implements IVisualisation {
 		gc.fillRect(100,80, 130, 20);
 		gc.setFill(Color.RED);						// then write new text
 		gc.setFont(new Font(20));
-		gc.fillText("Customer " + customerCount, 100, 100);
+		gc.fillText("ApplicationAsCustomer " + customerCount, 100, 100);
 	}
 }

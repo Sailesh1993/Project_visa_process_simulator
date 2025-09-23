@@ -9,8 +9,8 @@ public class Visualisation extends Canvas implements IVisualisation {
 	double i = 0;
 	double j = 10;
 
-	public Visualisation(int w, int h) {
-		super(w, h);
+	public Visualisation(int width, int height) {
+		super(width, height);
 		gc = this.getGraphicsContext2D();
 		clearDisplay();
 	}
