@@ -1,14 +1,24 @@
-# Default ignored files
-/shelf/
-/httpRequests/
-/dataSources/
-/dataSources.local.xml
+# Java compiled files
+*.class
+/out/
 
-# IntelliJ IDEA files
+# IntelliJ IDEA
 .idea/
 *.iml
 .idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries/
+.idea/gradle.xml
+.idea/libraries/
+
+# Build tools
+/target/         # for Maven
+/build/          # for Gradle
+/.gradle/
+
+# Logs
 *.log
-# Ignore compiled Java classes
-out/
-*.class
+
+# OS-specific
+.DS_Store
+Thumbs.db
