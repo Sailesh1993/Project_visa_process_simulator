@@ -1,6 +1,5 @@
 package eduni.distributions;
 
-import eduni.distributions.ContinuousGenerator;
 import eduni.distributions.RandomGenerator;
 
 /**
