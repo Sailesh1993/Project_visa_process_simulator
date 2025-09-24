@@ -7,8 +7,5 @@
 # IntelliJ IDEA files
 .idea/
 *.iml
-<<<<<<< HEAD
-.idea/workspace.xml
-=======
 out/
->>>>>>> 135c7dc (Renamed class file name)
+
