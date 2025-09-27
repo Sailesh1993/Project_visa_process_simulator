@@ -51,12 +51,12 @@ public class ServicePoint {
 
     public String getServicePointName() {
         switch (eventTypeScheduled) {
-            case END_APPLICATION_ENTRY: return "Application Entry & Appointment Booking";
-            case END_DOC_SUBMISSION: return "Document Submission & Interview";
-            case END_BIOMETRICS: return "Biometrics Collection";
-            case MISSING_DOCS_RESOLVED: return "Missing Documents Resolution";
-            case END_DOC_CHECK: return "Document Verification & Background Check";
-            case END_DECISION: return "Decision Room";
+            case END_APPLICATION_ENTRY: return "[1] Application Entry & Appointment Booking";
+            case END_DOC_SUBMISSION: return "[2] Document Submission & Interview";
+            case END_BIOMETRICS: return "[3] Biometrics Collection";
+            case MISSING_DOCS_RESOLVED: return "[4] Missing Documents Resolution";
+            case END_DOC_CHECK: return "[5] Document Verification & Background Check";
+            case END_DECISION: return "[6] Decision Room";
             default: return "Unknown Service Point";
         }
     }
