@@ -10,4 +10,6 @@ public interface ISimulatorUI {
 	
 	// Controller requires
 	public IVisualisation getVisualisation();
+
+    public void displayResults(String resultsText);
 }

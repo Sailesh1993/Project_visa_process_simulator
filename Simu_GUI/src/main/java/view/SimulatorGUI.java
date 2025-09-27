@@ -55,7 +55,7 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
                 System.exit(0);
             });
 
-			primaryStage.setTitle("Simulator");
+			primaryStage.setTitle("Visa Application Simulator");
 
 			startButton = new Button();
 			startButton.setText("Start simulation");
@@ -84,18 +84,20 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 	        delay.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
 	        delay.setPrefWidth(150);
 	                	        
-	        resultLabel = new Label("Total time:");
-			resultLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+	        resultLabel = new Label("Results:");
+			resultLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 11));
 	        results = new Label();
-	        results.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+	        results.setFont(Font.font("Tahoma", FontWeight.NORMAL, 10));
 	        results.setPrefWidth(150);
+            results.setAlignment(Pos.CENTER_LEFT);
 
-	        HBox hBox = new HBox();
-	        hBox.setPadding(new Insets(15, 12, 15, 12)); // margins up, right, bottom, left
-	        hBox.setSpacing(10);   // node distance 10 pixel
+            if (display == null) {
+                //display = new Visualisation(700,400);               //Select either Visualisation or Visualisation2 for 2 different visuals
+                display = new Visualisation2(500, 400);
+            }
 	        
 	        GridPane grid = new GridPane();
-	        grid.setAlignment(Pos.CENTER);
+	        grid.setAlignment(Pos.TOP_RIGHT);
 	        grid.setVgap(10);
 	        grid.setHgap(5);
 
@@ -105,17 +107,29 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 	        grid.add(delay, 1, 1);
 	        grid.add(resultLabel, 0, 2);
 	        grid.add(results, 1, 2);
-	        grid.add(startButton,0, 3);
+	       /* grid.add(startButton,0, 3);
 	        grid.add(speedUpButton, 0, 4);
-	        grid.add(slowButton, 1, 4);
-	        
-	        display = new Visualisation(400,200);               //Select either Visualisation or Visualisation2 for 2 different visuals
-			//display = new Visualisation2(400,200);
+	        grid.add(slowButton, 1, 4); */
+
+            //Added new VBox to place buttons below the grid ***
+            VBox buttonBox = new VBox(10);                  //Vertical spacing between buttons
+            buttonBox.getChildren().addAll(startButton, speedUpButton, slowButton);
+            buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+            // Create a container for the display and buttons
+            VBox displayAndButtons = new VBox(20);
+            displayAndButtons.setAlignment(Pos.CENTER_RIGHT);
+            displayAndButtons.getChildren().addAll((Canvas) display, buttonBox);
+
+            HBox hBox = new HBox(20);
+            hBox.setPadding(new Insets(15, 12, 15, 12)); // margins up, right, bottom, left
+            hBox.setSpacing(10);   // node distance 10 pixel
+            hBox.setAlignment(Pos.TOP_RIGHT);
 
 	        // Fill the box:
-	        hBox.getChildren().addAll(grid, (Canvas) display);
-	        
-	        Scene scene = new Scene(hBox);
+	        hBox.getChildren().addAll(grid, displayAndButtons);
+
+	        Scene scene = new Scene(hBox, 1050, 850);
 	        primaryStage.setScene(scene);
 	        primaryStage.show();
 		} catch(Exception e) {
@@ -144,6 +158,13 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 	public IVisualisation getVisualisation() {
 		 return display;
 	}
+
+    @Override
+    public void displayResults(String resultsText) {
+        Platform.runLater(() -> {
+            resultLabel.setText(resultsText);                 //Setting results in Results Label
+        });
+    }
 
 	/* JavaFX-application (UI) start-up */
 	public static void main(String[] args) {

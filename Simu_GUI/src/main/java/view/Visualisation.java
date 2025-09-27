@@ -9,14 +9,22 @@ public class Visualisation extends Canvas implements IVisualisation {
 	double i = 0;
 	double j = 10;
 
+    private int[] queueSizes = new int[6];                          //Array for holding queue size
+    private String[] servicePointLabels = new String[6];            //Array for storing labels of each service point
+
 	public Visualisation(int width, int height) {
 		super(width, height);
 		gc = this.getGraphicsContext2D();
 		clearDisplay();
+
+        //Initializing queue labels
+        for (int index = 0; index < 6; index++) {
+            servicePointLabels[index] = "Service Point " + (index + 1);
+        }
 	}
 
 	public void clearDisplay() {
-		gc.setFill(Color.YELLOW);
+		gc.setFill(Color.GREEN);
 		gc.fillRect(0, 0, this.getWidth(), this.getHeight());
 	}
 	
@@ -30,4 +38,13 @@ public class Visualisation extends Canvas implements IVisualisation {
 			j += 10;
 		}
 	}
+
+    @Override
+    public void updateServicePointQueue(int servicePointId, int queueSize) {
+        queueSizes[servicePointId] = queueSize;         //Updating queue size for service point
+
+        //Updating queue status on canvas(text based)
+        gc.setFill(Color.BLACK);
+        gc.fillText(servicePointLabels[servicePointId] + ": " + queueSize, 10, 50 + servicePointId * 30);
+    }
 }

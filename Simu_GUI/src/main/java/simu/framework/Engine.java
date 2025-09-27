@@ -54,7 +54,7 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 		}
 	}
 
-	private void tryCEvents() {    // define protected, if you want to overwrite
+	protected void tryCEvents() {    // define protected, if you want to overwrite
 		for (ServicePoint p: servicePoints){
 			if (!p.isReserved() && p.isOnQueue()){
 				p.beginService();

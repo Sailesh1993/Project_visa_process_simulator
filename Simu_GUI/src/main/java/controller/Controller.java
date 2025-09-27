@@ -47,4 +47,16 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 	public void visualiseCustomer() {
 		Platform.runLater(() -> ui.getVisualisation().newCustomer());
 	}
+
+    @Override
+    public void updateQueueStatus(int servicePointId, int queueSize) {
+        Platform.runLater(() -> ui.getVisualisation().updateServicePointQueue(servicePointId, queueSize));
+    }
+
+    @Override
+    public void displayResults(String resultsText) {
+        Platform.runLater(() -> {
+            ui.displayResults(resultsText);                 //Calling method in SimulatorGUI to update results Label
+        });
+    }
 }

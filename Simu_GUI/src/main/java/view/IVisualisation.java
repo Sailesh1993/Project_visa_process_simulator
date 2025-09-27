@@ -1,7 +1,10 @@
 package view;
 
 public interface IVisualisation {
-	public void clearDisplay();
-	public void newCustomer();
+	void clearDisplay();
+
+    void newCustomer();
+
+    void updateServicePointQueue(int servicePointId, int queueSize);
 }
 
