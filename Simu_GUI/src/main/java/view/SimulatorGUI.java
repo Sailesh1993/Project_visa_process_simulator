@@ -165,9 +165,4 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
             resultLabel.setText(resultsText);                 //Setting results in Results Label
         });
     }
-
-	/* JavaFX-application (UI) start-up */
-	public static void main(String[] args) {
-		launch(args);
-	}
 }
