@@ -11,6 +11,9 @@ public class ApplicationAsCustomer {
 	private int id;
 	private static int idCounter = 1;
 
+    private int reapplyAttempts = 1;
+    private static final int MAX_ATTEMPTS = 3;
+
     private boolean newApplication;
     private boolean docsComplete;
     private boolean requiresBiometrics;
@@ -22,7 +25,6 @@ public class ApplicationAsCustomer {
     private double timeEnteredQueue = -1.0;         //timestamp for waiting time measurement
 
     //Create a unique customer
-	
 	public ApplicationAsCustomer(boolean newApplication, boolean docsComplete) {
 	    id = idCounter++;
         this.newApplication = newApplication;
@@ -109,6 +111,11 @@ public class ApplicationAsCustomer {
         this.newApplication = false;
         this.requiresBiometrics = false;             // Reapplications do not require biometrics
         this.currentStage = EventType.REAPPLICATION;
+        reapplyAttempts++;
+    }
+
+    public boolean canReapply() {
+        return reapplyAttempts < MAX_ATTEMPTS;
     }
 
     //Report the measured variables of the customer. In this case to the diagnostic output.
