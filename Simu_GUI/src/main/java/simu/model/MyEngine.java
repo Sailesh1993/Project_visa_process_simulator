@@ -2,10 +2,14 @@ package simu.model;
 
 import controller.IControllerMtoV;
 
+import dao.SimulationRunDao;
 import distributionconfiguration.DistributionConfig;
-
+import entity.*;
 import simu.framework.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MyEngine extends Engine {
@@ -162,6 +166,14 @@ public class MyEngine extends Engine {
 		// NEW GUI
         double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
 
+        SimulationRun run = new SimulationRun();
+        run.setTimestamp(LocalDateTime.now());
+        run.setTotalApplications(totalApplications);
+        run.setApprovedCount(approvedCount);
+        run.setRejectedCount(rejectedCount);
+        run.setAvgSystemTime(avgTimeInSystem);
+        run.setConfigSaved(true);
+
         // Find bottleneck service point
         ServicePoint bottleneck = null;
         double maxUtilization = 0.0;
@@ -172,6 +184,42 @@ public class MyEngine extends Engine {
                 bottleneck = sp;
             }
         }
+
+        // Create ServicePointResults with bottleneck info
+        List<SPResult> spResults = new ArrayList<>();
+        for (ServicePoint sp : servicePoints) {
+            boolean isBottleneck = (sp == bottleneck);
+            SPResult spr = new SPResult(
+                    sp.getServicePointName(),
+                    sp.getTotalDepartures(),
+                    sp.getAverageWaitingTime(),
+                    sp.getMaxQueueLength(),
+                    sp.getUtilization(Clock.getInstance().getTime()),
+                    sp.getNumEmployees(),
+                    isBottleneck                                    // mark bottleneck
+            );
+            spResults.add(spr);
+        }
+
+        // Create DistributionConfigs (example placeholder)
+        List<DistConfig> configs = new ArrayList<>();
+        for (int i = 0; i < servicePoints.length; i++) {
+            DistConfig dc = new DistConfig(
+                    servicePoints[i].getServicePointName(),
+                    "Normal",  // example
+                    5.0,
+                    2.0
+            );
+            configs.add(dc);
+        }
+
+        // Optional ApplicationLogs
+        List<ApplicationLog> logs = new ArrayList<>();
+        // Fill logs if needed
+
+        //Persist everything manually via DAO
+        SimulationRunDao dao = new SimulationRunDao();
+        dao.persist(run, configs, spResults, logs);
 
         // Prepare the result string
         StringBuilder resultStr = new StringBuilder();
