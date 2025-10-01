@@ -1,5 +1,6 @@
 package controller;
 
+import distributionconfiguration.DistributionConfig;
 import javafx.application.Platform;
 import simu.framework.IEngine;
 import simu.model.MyEngine;
@@ -8,15 +9,20 @@ import view.ISimulatorUI;
 public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 	private IEngine engine;
 	private ISimulatorUI ui;
+
+    private DistributionConfig[] configs;
+    private Long seed;
 	
-	public Controller(ISimulatorUI ui) {
-		this.ui = ui;
+	public Controller(ISimulatorUI ui, DistributionConfig[] configs, Long seed) {
+        this.ui = ui;
+        this.configs = configs;
+        this.seed = seed;
 	}
 
 	/* Engine control: */
 	@Override
 	public void startSimulation() {
-		engine = new MyEngine(this); // new Engine thread is created for every simulation
+		engine = new MyEngine(this, configs, seed); // new Engine thread is created for every simulation
 		engine.setSimulationTime(ui.getTime());
 		engine.setDelay(ui.getDelay());
 		ui.getVisualisation().clearDisplay();
