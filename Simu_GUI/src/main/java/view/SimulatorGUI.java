@@ -39,13 +39,6 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 
 	private IVisualisation display;
 
-
-	@Override
-	public void init() {
-		Trace.setTraceLevel(Level.INFO);
-		controller = new Controller(this);
-	}
-
 	@Override
 	public void start(Stage primaryStage) {
 		// UI creation
