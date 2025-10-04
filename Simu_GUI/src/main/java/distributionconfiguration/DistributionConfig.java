@@ -47,6 +47,12 @@ public class DistributionConfig {
         return forArrival;
     }
 
+    public String getType() { return type; }
+
+    public double getParam1() { return param1; }
+
+    public Double getParam2() { return param2; }
+
     @Override
     public String toString() {
         if (param2 != null) {

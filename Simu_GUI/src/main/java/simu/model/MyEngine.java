@@ -13,10 +13,14 @@ import java.util.List;
 import java.util.Random;
 
 public class MyEngine extends Engine {
-	private ArrivalProcess arrivalProcess;
+    private ArrivalProcess arrivalProcess;
     private ServicePoint[] servicePoints;
     private Random randomGenerator;
     private IControllerMtoV controller;
+
+    private DistributionConfig[] userConfigs;
+
+    private List<ApplicationLog> applicationLogs = new ArrayList<>();
 
     //counters
     private int totalApplications = 0;
@@ -28,8 +32,10 @@ public class MyEngine extends Engine {
     private int exitedRejectedCount = 0;
 
     public MyEngine(IControllerMtoV controller, DistributionConfig[] configs, Long seed){ // NEW
-		super(controller);                  // NEW(Pass controller to Engine)
+        super(controller);// NEW(Pass controller to Engine)
+        Clock.getInstance().reset();// for new simulation
         this.controller = controller;
+        this.userConfigs = configs;
         servicePoints = new ServicePoint[6];
         randomGenerator = (seed != null) ? new Random(seed) : new Random(System.currentTimeMillis());           //To make runs repeatable(Same results everytime)
 
@@ -42,17 +48,19 @@ public class MyEngine extends Engine {
 
         // Initialize Arrival Process
         arrivalProcess = new ArrivalProcess(configs[6].buildGenerator(), eventList, EventType.ARRIVAL);
-	}
+    }
 
-	@Override
-	protected void initialization() {arrivalProcess.generateNext();}	            // First arrival in the system
+    @Override
+    protected void initialization() {
+        ApplicationAsCustomer.resetIdCounter();
+        arrivalProcess.generateNext();
+    }
 
+    @Override
+    protected void runEvent(Event t) {  // B phase events
+        ApplicationAsCustomer application;
 
-	@Override
-	protected void runEvent(Event t) {  // B phase events
-		ApplicationAsCustomer application;
-
-		switch ((EventType)t.getType()){
+        switch ((EventType)t.getType()){
             case ARRIVAL:
                 boolean isNew = randomGenerator.nextDouble() < 0.65;      //65% chance of being a new application
                 boolean docsComplete = randomGenerator.nextDouble() < 0.8;        //80% chance of having all documents complete
@@ -113,7 +121,7 @@ public class MyEngine extends Engine {
                 application = servicePoints[5].removeQueue();
                 application.setRemovalTime(Clock.getInstance().getTime());
 
-                boolean approved = randomGenerator.nextDouble() < 0.7; // 70% chance of approval
+                boolean approved = randomGenerator.nextDouble() < 0.7;
                 application.setApproved(approved);
 
                 totalApplications++;
@@ -122,9 +130,25 @@ public class MyEngine extends Engine {
 
                 totalSystemTime += application.getRemovalTime() - application.getArrivalTime();
 
+                // NEW: Update UI with current statistics
+                double avgTime = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
+                controller.updateStatistics(totalApplications, approvedCount, rejectedCount, avgTime, Clock.getInstance().getTime());
+
                 // Schedule exit
                 EventType exitEvent = approved ? EventType.EXIT_APPROVED : EventType.EXIT_REJECTED;
                 eventList.add(new Event(exitEvent, Clock.getInstance().getTime()));
+
+                // Create and collect an ApplicationLog record for persistence
+                ApplicationLog log = new ApplicationLog();
+                StringBuilder msg = new StringBuilder();
+                msg.append("Application ID: ").append(application.getId())
+                        .append(" | Arrival: ").append(application.getArrivalTime())
+                        .append(" | Removal: ").append(application.getRemovalTime())
+                        .append(" | TimeInSystem: ").append(String.format("%.2f", application.getRemovalTime() - application.getArrivalTime()))
+                        .append(" | Approved: ").append(approved);
+                log.setMessage(msg.toString());
+                log.setTimestamp(LocalDateTime.now());
+                applicationLogs.add(log);
 
                 application.reportResults();
 
@@ -138,7 +162,7 @@ public class MyEngine extends Engine {
                     }
                 }
 
-                controller.updateQueueStatus(5, servicePoints[5].getQueueSize());           //Update UI
+                controller.updateQueueStatus(5, servicePoints[5].getQueueSize());
                 break;
 
             case EXIT_APPROVED:
@@ -161,11 +185,12 @@ public class MyEngine extends Engine {
         }
     }
 
-	@Override
-	protected void results() {
-		// NEW GUI
+    @Override
+    protected void results() {
+        // NEW GUI
         double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
 
+        //SimulationRun
         SimulationRun run = new SimulationRun();
         run.setTimestamp(LocalDateTime.now());
         run.setTotalApplications(totalApplications);
@@ -177,6 +202,7 @@ public class MyEngine extends Engine {
         // Find bottleneck service point
         ServicePoint bottleneck = null;
         double maxUtilization = 0.0;
+        List<SPResult> spResults = new ArrayList<>();
         for (ServicePoint sp : servicePoints) {
             double utilization = sp.getUtilization(Clock.getInstance().getTime());
             if (utilization > maxUtilization) {
@@ -186,7 +212,6 @@ public class MyEngine extends Engine {
         }
 
         // Create ServicePointResults with bottleneck info
-        List<SPResult> spResults = new ArrayList<>();
         for (ServicePoint sp : servicePoints) {
             boolean isBottleneck = (sp == bottleneck);
             SPResult spr = new SPResult(
@@ -201,25 +226,60 @@ public class MyEngine extends Engine {
             spResults.add(spr);
         }
 
-        // Create DistributionConfigs (example placeholder)
+        // Create DistributionConfigs
         List<DistConfig> configs = new ArrayList<>();
         for (int i = 0; i < servicePoints.length; i++) {
-            DistConfig dc = new DistConfig(
-                    servicePoints[i].getServicePointName(),
-                    "Normal",  // example
-                    5.0,
-                    2.0
-            );
+            DistributionConfig ucfg = userConfigs[i]; // user-provided simulation config
+            DistConfig dc = new DistConfig();
+
+            dc.setServicePointName(servicePoints[i].getServicePointName());
+
+            dc.setDistributionType(ucfg.getType());
+            dc.setParam1(ucfg.getParam1());
+            // param2 might be absent for negexp; support null
+            Double p2 = null;
+            try {
+                p2 = ucfg.getParam2();
+            } catch (Exception ignored) {
+            }
+            dc.setParam2(p2);
+
+            dc.setSimulationRun(run);
             configs.add(dc);
         }
 
-        // Optional ApplicationLogs
-        List<ApplicationLog> logs = new ArrayList<>();
-        // Fill logs if needed
+// Arrival process config at index 6)
+        DistributionConfig arrivalCfg = userConfigs[6];
+        DistConfig arrivalDc = new DistConfig();
+        arrivalDc.setServicePointName("Arrival Process");
+        arrivalDc.setDistributionType(arrivalCfg.getType());
+        arrivalDc.setParam1(arrivalCfg.getParam1());
+        try {
+            arrivalDc.setParam2(arrivalCfg.getParam2());
+        } catch (Exception ignored) {
+            arrivalDc.setParam2(null);
+        }
+        arrivalDc.setSimulationRun(run);
+        configs.add(arrivalDc);
 
-        //Persist everything manually via DAO
-        SimulationRunDao dao = new SimulationRunDao();
-        dao.persist(run, configs, spResults, logs);
+        List<ApplicationLog> logs = new ArrayList<>();
+        for (ApplicationAsCustomer app : ApplicationAsCustomer.getAllApplications()) {
+            ApplicationLog log = new ApplicationLog();
+            log.setMessage("Application " + app.getId() + " completed. Approved: " + app.isApproved());
+            log.setTimestamp(LocalDateTime.now());
+            log.setSimulationRun(run);
+            logs.add(log);
+        }
+
+        // Ask controller/UI layer to save (controller will persist using DAO on its own EM thread)
+        if (controller instanceof controller.SimulationController) {
+            // cast is safe if your controller implements that class
+            ((controller.SimulationController) controller).saveSimulationRun(run, configs, spResults, logs);
+        } else {
+            // fallback - persist directly (keeps backward compatibility)
+            SimulationRunDao dao = new SimulationRunDao();
+            dao.persist(run, configs, spResults, logs);
+        }
 
         // Prepare the result string
         StringBuilder resultStr = new StringBuilder();
@@ -262,5 +322,8 @@ public class MyEngine extends Engine {
 
         // Send the results to the GUI for display
         controller.displayResults(resultStr.toString());
+
+        // for controller simulation result panel
+        controller.showEndTime(Clock.getInstance().getTime());
     }
 }

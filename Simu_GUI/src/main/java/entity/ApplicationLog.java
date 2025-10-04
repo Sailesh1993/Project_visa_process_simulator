@@ -2,6 +2,8 @@ package entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name="application_log")
 public class ApplicationLog {
@@ -18,6 +20,12 @@ public class ApplicationLog {
 
     @Column(name="Removal_Time")
     private double removalTime;
+
+    @Column(name = "Message", length = 255)
+    private String message;
+
+    @Column(name = "Timestamp")
+    private LocalDateTime timestamp;
 
     private boolean approved;
     private double waitingTime;
@@ -37,13 +45,17 @@ public class ApplicationLog {
         this.waitingTime = waitingTime;
     }
 
-    public Long id() {return id;}
+    public Long getId() {return id;}
 
     public int getAppId() {return appId;}
 
     public double getArrivalTime() {return arrivalTime;}
 
     public double getRemovalTime() {return removalTime;}
+
+    public String getMessage() { return message; }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
 
     public boolean isApproved() {return approved;}
 
@@ -54,6 +66,10 @@ public class ApplicationLog {
     public void setArrivalTime(double arrivalTime) {this.arrivalTime = arrivalTime;}
 
     public void setRemovalTime(double removalTime) {this.removalTime = removalTime;}
+
+    public void setMessage(String message) { this.message = message; }
+
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
     public void setApproved(boolean approved) {this.approved = approved;}
 

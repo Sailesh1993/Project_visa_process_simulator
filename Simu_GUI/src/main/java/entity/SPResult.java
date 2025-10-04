@@ -3,17 +3,17 @@ package entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="servicepoint_result")
+@Table(name = "servicepoint_result")
 public class SPResult {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="ServicePoint_Name")
+    @Column(name = "ServicePoint_Name")
     private String servicePointName;
 
-    @Column(name="Departures")
+    @Column(name = "Departures")
     private int departures;
 
     private double avgWaitingTime;
@@ -28,7 +28,7 @@ public class SPResult {
     private SimulationRun simulationRun;
 
     public SPResult(String servicePointName, int departures, double avgWaitingTime,
-                              int maxQueueLength, double utilization, int numEmployees, boolean bottleneck) {
+                    int maxQueueLength, double utilization, int numEmployees, boolean bottleneck) {
         this.servicePointName = servicePointName;
         this.departures = departures;
         this.avgWaitingTime = avgWaitingTime;
@@ -38,31 +38,72 @@ public class SPResult {
         this.bottleneck = bottleneck;
     }
 
-    public SPResult() {}
+    public SPResult() {
+    }
 
-    public Long getId() {return id;}
+    public Long getId() {
+        return id;
+    }
 
-    public double getAvgWaitingTime() {return avgWaitingTime;}
+    public double getAvgWaitingTime() {
+        return avgWaitingTime;
+    }
 
-    public int getMaxQueueLength() {return maxQueueLength;}
+    public void setAvgWaitingTime(double avgWaitingTime) {
+        this.avgWaitingTime = avgWaitingTime;
+    }
 
-    public double getUtilization() {return utilization;}
+    public int getMaxQueueLength() {
+        return maxQueueLength;
+    }
 
-    public int getNumEmployees() {return numEmployees;}
+    public void setMaxQueueLength(int maxQueueLength) {
+        this.maxQueueLength = maxQueueLength;
+    }
 
-    public boolean isBottleneck() {return bottleneck;}
+    public double getUtilization() {
+        return utilization;
+    }
 
-    public void setAvgWaitingTime(double avgWaitingTime) {this.avgWaitingTime = avgWaitingTime;}
+    public void setUtilization(double utilization) {
+        this.utilization = utilization;
+    }
 
-    public void setMaxQueueLength(int maxQueueLength) {this.maxQueueLength = maxQueueLength;}
+    public int getNumEmployees() {
+        return numEmployees;
+    }
 
-    public void setUtilization(double utilization) {this.utilization = utilization;}
+    public void setNumEmployees(int numEmployees) {
+        this.numEmployees = numEmployees;
+    }
 
-    public void setNumEmployees(int numEmployees) {this.numEmployees = numEmployees;}
+    public boolean isBottleneck() {
+        return bottleneck;
+    }
 
-    public void setBottleneck(boolean bottleneck) {this.bottleneck = bottleneck;}
+    public void setBottleneck(boolean bottleneck) {
+        this.bottleneck = bottleneck;
+    }
 
-    public void setSimulationRun(SimulationRun run) {this.simulationRun = run;}
+    public String getServicePointName() {
+        return servicePointName;
+    }
 
+    public void setServicePointName(String servicePointName) {
+        this.servicePointName = servicePointName;
+    }
+
+    public int getDepartures() {
+        return departures;
+    }
+
+    public void setDepartures(int departures) {
+        this.departures = departures;
+
+    }
+
+    public void setSimulationRun(SimulationRun run) {
+        this.simulationRun = run;
+    }
 
 }

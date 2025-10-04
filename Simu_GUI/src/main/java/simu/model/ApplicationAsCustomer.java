@@ -3,17 +3,19 @@ package simu.model;
 import simu.framework.Clock;
 import simu.framework.Trace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // TODO:
 // ApplicationAsCustomer to be implemented according to the requirements of the simulation model (data!)
 public class ApplicationAsCustomer {
-	private double arrivalTime;
-	private double removalTime;
-	private int id;
-	private static int idCounter = 1;
-
-    private int reapplyAttempts = 1;
+    private static final List<ApplicationAsCustomer> allApplications = new ArrayList<>();
     private static final int MAX_ATTEMPTS = 3;
-
+    private static int idCounter = 1;
+    private double arrivalTime;
+    private double removalTime;
+    private int id;
+    private int reapplyAttempts = 1;
     private boolean newApplication;
     private boolean docsComplete;
     private boolean requiresBiometrics;
@@ -25,13 +27,14 @@ public class ApplicationAsCustomer {
     private double timeEnteredQueue = -1.0;         //timestamp for waiting time measurement
 
     //Create a unique customer
-	public ApplicationAsCustomer(boolean newApplication, boolean docsComplete) {
-	    id = idCounter++;
+    public ApplicationAsCustomer(boolean newApplication, boolean docsComplete) {
+        id = idCounter++;
         this.newApplication = newApplication;
         this.docsComplete = docsComplete;
         this.requiresBiometrics = newApplication;       // Only new applications require biometrics
         arrivalTime = Clock.getInstance().getTime();
         this.currentStage = EventType.ARRIVAL;
+        allApplications.add(this);
 
         Trace.out(Trace.Level.INFO, "New application #" + id + " arrived at " + Trace.formatTime(arrivalTime));
         Trace.out(Trace.Level.INFO,
@@ -49,11 +52,19 @@ public class ApplicationAsCustomer {
         return arrivalTime;
     }       //Get customer arrival time for simulation
 
-    public double getRemovalTime() {return removalTime;}         // Get time when customer has been removed (from the system to be simulated)
+    public void setArrivalTime(double arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }           //Mark the time when the customer arrived to the system to be simulated
 
-    public void setRemovalTime(double removalTime) {this.removalTime = removalTime;}           //Mark the time when the customer has been removed (from the system to be simulated)
+    public double getRemovalTime() {
+        return removalTime;
+    }         // Get time when customer has been removed (from the system to be simulated)
 
-    public void setArrivalTime(double arrivalTime) {this.arrivalTime = arrivalTime;}           //Mark the time when the customer arrived to the system to be simulated
+    public static List<ApplicationAsCustomer> getAllApplications() {return allApplications;}
+
+    public void setRemovalTime(double removalTime) {
+        this.removalTime = removalTime;
+    }           //Mark the time when the customer has been removed (from the system to be simulated)
 
     public boolean isNewApplication() {
         return newApplication;
@@ -103,9 +114,13 @@ public class ApplicationAsCustomer {
         this.timeInWaitingRoom = time;
     }
 
-    public void setTimeEnteredQueue(double t) { this.timeEnteredQueue = t; }
+    public double getTimeEnteredQueue() {
+        return timeEnteredQueue;
+    }
 
-    public double getTimeEnteredQueue() { return timeEnteredQueue; }
+    public void setTimeEnteredQueue(double t) {
+        this.timeEnteredQueue = t;
+    }
 
     public void markReapplication() {
         this.newApplication = false;
@@ -118,22 +133,27 @@ public class ApplicationAsCustomer {
         return reapplyAttempts < MAX_ATTEMPTS;
     }
 
+    public static void resetIdCounter() {
+        allApplications.clear();
+    }
+
+
     //Report the measured variables of the customer. In this case to the diagnostic output.
 
     public void reportResults() {
         Trace.out(Trace.Level.INFO, "\nApplication #" + id + " is processed! ");
         Trace.out(Trace.Level.INFO, "Application #" + id + " arrived at " + Trace.formatTime(arrivalTime));
-        Trace.out(Trace.Level.INFO,"Application #" + id + " removed at " + Trace.formatTime(removalTime));
-        Trace.out(Trace.Level.INFO,"Total time in system: " + id + " "  + Trace.formatTime((removalTime - arrivalTime)));
-        Trace.out(Trace.Level.INFO,"Application waited " + Trace.formatTime(getTimeInWaitingRoom()) + " minutes in queue.");
+        Trace.out(Trace.Level.INFO, "Application #" + id + " removed at " + Trace.formatTime(removalTime));
+        Trace.out(Trace.Level.INFO, "Total time in system: " + id + " " + Trace.formatTime((removalTime - arrivalTime)));
+        Trace.out(Trace.Level.INFO, "Application waited " + Trace.formatTime(getTimeInWaitingRoom()) + " minutes in queue.");
 
         if (requiresBiometrics) {
             Trace.out(Trace.Level.INFO, "Time spent in biometrics: " + Trace.formatTime(getTimeInBiometrics()) + " minutes");
         }
 
-        Trace.out(Trace.Level.INFO,"Is this new application? " + newApplication);
-        Trace.out(Trace.Level.INFO,"Are the required documents complete? " + docsComplete);
-        Trace.out(Trace.Level.INFO,"Is biometrics required? " + requiresBiometrics);
-        Trace.out(Trace.Level.INFO,"Visa decision: " + (approved ? "Approved ✅" : "Denied ❌"));
+        Trace.out(Trace.Level.INFO, "Is this new application? " + newApplication);
+        Trace.out(Trace.Level.INFO, "Are the required documents complete? " + docsComplete);
+        Trace.out(Trace.Level.INFO, "Is biometrics required? " + requiresBiometrics);
+        Trace.out(Trace.Level.INFO, "Visa decision: " + (approved ? "Approved ✅" : "Denied ❌"));
     }
 }

@@ -35,23 +35,23 @@ public class DistConfig {
 
     public DistConfig() {}
 
-    public Long getId() {return id;}
+    public Long getId() { return id; }
 
-    public String getServicePointName() {return servicePointName;}
+    public String getServicePointName() { return servicePointName; }
 
-    public String getDistributionType() {return distributionType;}
+    public String getDistributionType() { return distributionType; }
 
-    public double getParam1() {return param1;}
+    public double getParam1() { return param1; }
 
-    public Double getParam2() {return param2;}
+    public Double getParam2() { return param2; }
 
-    public void setServicePointName(String spName) {this.servicePointName = servicePointName;}
+    public void setServicePointName(String servicePointName) { this.servicePointName = servicePointName; }
 
-    public void setDistributionType(String distributionType) {this.distributionType = distributionType;}
+    public void setDistributionType(String distributionType) { this.distributionType = distributionType; }
 
-    public void setParam1(double param1) {this.param1 = param1;}
+    public void setParam1(double param1) { this.param1 = param1; }
 
-    public void setParam2(Double param2) {this.param2 = param2;}
+    public void setParam2(Double param2) { this.param2 = param2; }
 
-    public void setSimulationRun(SimulationRun run) {this.simulationRun = run;}
+    public void setSimulationRun(SimulationRun run) { this.simulationRun = run; }
 }

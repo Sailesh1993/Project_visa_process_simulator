@@ -39,7 +39,12 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 
 	private IVisualisation display;
 
-	@Override
+    @Override
+    public void init() {
+        Trace.setTraceLevel(Level.INFO);
+    }
+
+    @Override
 	public void start(Stage primaryStage) {
 		// UI creation
 		try {
@@ -52,7 +57,12 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 
 			startButton = new Button();
 			startButton.setText("Start simulation");
-			startButton.setOnAction(event -> {
+            if (controller == null) {
+                // Create controller only when user clicks Start, passing values from fields
+                long seed = System.currentTimeMillis(); // or read from another TextField if GUI has it
+                String configs = "default-config";      // replace with actual config input
+                controller = new Controller(this);
+            }
                 controller.startSimulation();
                 startButton.setDisable(true);
             });
@@ -76,7 +86,7 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 	        delay = new TextField("Give delay");
 	        delay.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
 	        delay.setPrefWidth(150);
-	                	        
+
 	        resultLabel = new Label("Results:");
 			resultLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 11));
 	        results = new Label();
@@ -88,7 +98,7 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
                 //display = new Visualisation(700,400);               //Select either Visualisation or Visualisation2 for 2 different visuals
                 display = new Visualisation2(500, 400);
             }
-	        
+
 	        GridPane grid = new GridPane();
 	        grid.setAlignment(Pos.TOP_RIGHT);
 	        grid.setVgap(10);

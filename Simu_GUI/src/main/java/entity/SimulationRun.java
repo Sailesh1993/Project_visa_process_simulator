@@ -17,6 +17,8 @@ public class SimulationRun {
     @Column(name = "Timestamp")
     private LocalDateTime timestamp;
 
+    private String runName; // NEW
+
     @Column(name = "Total_Applications")
     private int totalApplications;
 
@@ -41,12 +43,16 @@ public class SimulationRun {
     @OneToMany(mappedBy = "simulationRun")
     private List<ApplicationLog> applicationLogs = new ArrayList<>();
 
-    public SimulationRun() {}
+    public SimulationRun() {this.timestamp = LocalDateTime.now();}
 
     //getters
     public Long getId() {return id;}
 
     public LocalDateTime getTimestamp() {return timestamp;}
+
+    public String getRunName() { return runName; }
+
+    public void setRunName(String runName) { this.runName = runName; }
 
     public int getTotalApplications() {return totalApplications;}
 
@@ -65,6 +71,8 @@ public class SimulationRun {
     public List<ApplicationLog> getApplicationLogs() {return applicationLogs;}
 
     //setters
+    public void setId(Long id) { this.id = id; }
+
     public void setTimestamp(LocalDateTime timestamp) {this.timestamp = timestamp;}
 
     public void setTotalApplications(int totalApplications) {this.totalApplications = totalApplications;}

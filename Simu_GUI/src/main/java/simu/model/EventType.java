@@ -98,36 +98,18 @@ public enum EventType implements IEventType {
 
     //Get the service point number associated with this event
     public int getServicePointIndex() {
-        switch (this) {
-            case END_APPLICATION_ENTRY:
-                return 0; // SP1: Application Entry & Appointment Booking
-            case END_DOC_SUBMISSION:
-                return 1; // SP2: Doc Submission room - Interviews
-            case END_BIOMETRICS:
-                return 2; // SP2a: Biometrics room (sub-process of SP2)
-            case MISSING_DOCS_RESOLVED:
-                return 3; // SP2b: Missing Doc waiting room (sub-process of SP2)
-            case END_DOC_CHECK:
-                return 4; // SP3: Doc check room - Backgrounds, verifications
-            case END_DECISION:
-                return 5; // SP4: Decision room - Approve/Reject
-
-            default:
-                return -1; // Not associated with a specific service point
-        }
+        return switch (this) {
+            case END_APPLICATION_ENTRY ->  0; // SP1: Application Entry & Appointment Booking
+            case END_DOC_SUBMISSION  ->  1; // SP2: Doc Submission room - Interviews
+            case END_BIOMETRICS ->  2; // SP2a: Biometrics room (sub-process of SP2)
+            case MISSING_DOCS_RESOLVED ->  3; // SP2b: Missing Doc waiting room (sub-process of SP2)
+            case END_DOC_CHECK ->  4; // SP3: Doc check room - Backgrounds, verifications
+            case END_DECISION ->  5; // SP4: Decision room - Approve/Reject
+            default ->  1; // Not associated with a specific service point
+        };
     }
 
-    //Returns a formatted string representation
-    @Override
-    public String toString() {
-        return String.format("EventType.%s (%s)", this.name(), this.description);
-    }
-
-    //Get a simple display name for UI purposes
     public String getDisplayName() {
-        return name().toLowerCase()
-                .replace('_', ' ')
-                .replaceFirst("end ", "")
-                .replaceFirst("departure ", "");
+        return name().toLowerCase().replace('_', ' ');
     }
 }
