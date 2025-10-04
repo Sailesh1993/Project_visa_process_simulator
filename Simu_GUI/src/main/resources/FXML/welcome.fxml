@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #ECF0F1;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.controllers.WelcomeController">
+
+    <top>
+        <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #2C3E50; -fx-padding: 20;">
+            <children>
+                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="VISA APPLICATION PROCESSING SIMULATOR" />
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #BDC3C7;" text="Configure and run discrete event simulation" />
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #ECF0F1;">
+            <content>
+                <VBox spacing="20" style="-fx-padding: 30;">
+                    <children>
+                        <!-- Basic Parameters -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 5;">
+                            <children>
+                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Simulation Parameters" />
+                                <Separator />
+
+                                <GridPane hgap="15" vgap="15">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="200" />
+                                        <ColumnConstraints minWidth="150" />
+                                    </columnConstraints>
+                                    <children>
+                                        <Label style="-fx-font-size: 14px;" text="Simulation Time " GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <TextField fx:id="simulationTimeField" promptText="e.g., 1000" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label style="-fx-font-size: 14px;" text="Visualization Delay (ms):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <TextField fx:id="delayField" promptText="e.g., 10" text="10" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                        <Label style="-fx-font-size: 14px;" text="Random Seed (optional):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                        <TextField fx:id="seedField" promptText="Leave empty for random" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                           </rowConstraints>
+                                </GridPane>
+                            </children>
+                        </VBox>
+
+                        <!-- Distribution Configuration -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 5;">
+                            <children>
+                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Service Point Distributions" />
+                                <Separator />
+
+                                <Accordion fx:id="distributionAccordion">
+                                    <panes>
+                                        <!-- Arrival Process -->
+                                        <TitledPane expanded="true" text="Arrival Process (Customer Arrivals)">
+                                            <content>
+                                                <GridPane hgap="10" style="-fx-padding: 10;" vgap="10">
+                                                    <children>
+                                                        <Label text="Distribution Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="arrival_distType" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                        <Label text="Mean (λ):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                        <TextField fx:id="arrival_param1" text="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                        <Label fx:id="arrival_param2Label" text="Parameter 2:" visible="false" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="arrival_param2" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                    </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints />
+                                          <ColumnConstraints />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </TitledPane>
+
+                                        <!-- SP1 -->
+                                        <TitledPane text="SP1: Application Entry &amp; Appointment Booking">
+                                            <content>
+                                                <GridPane hgap="10" style="-fx-padding: 10;" vgap="10">
+                                                    <children>
+                                                        <Label text="Distribution Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="sp1_distType" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                        <Label text="Mean (μ):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                        <TextField fx:id="sp1_param1" text="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                        <Label fx:id="sp1_param2Label" text="Std Dev (σ):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="sp1_param2" text="2.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                    </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints />
+                                          <ColumnConstraints />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </TitledPane>
+
+                                        <!-- SP2 -->
+                                        <TitledPane text="SP2: Document Submission &amp; Interview">
+                                            <content>
+                                                <GridPane hgap="10" style="-fx-padding: 10;" vgap="10">
+                                                    <children>
+                                                        <Label text="Distribution Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="sp2_distType" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                        <Label text="Mean (μ):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                        <TextField fx:id="sp2_param1" text="15.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                        <Label fx:id="sp2_param2Label" text="Std Dev (σ):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="sp2_param2" text="3.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                    </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints />
+                                          <ColumnConstraints />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </TitledPane>
+
+                                        <!-- SP3 -->
+                                        <TitledPane text="SP3: Biometrics Collection">
+                                            <content>
+                                                <GridPane hgap="10" style="-fx-padding: 10;" vgap="10">
+                                                    <children>
+                                                        <Label text="Distribution Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="sp3_distType" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                        <Label text="Mean (μ):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                        <TextField fx:id="sp3_param1" text="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                        <Label fx:id="sp3_param2Label" text="Std Dev (σ):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="sp3_param2" text="1.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                    </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints />
+                                          <ColumnConstraints />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </TitledPane>
+
+                                        <!-- SP4 -->
+                                        <TitledPane text="SP4: Missing Documents Resolution">
+                                            <content>
+                                                <GridPane hgap="10" style="-fx-padding: 10;" vgap="10">
+                                                    <children>
+                                                        <Label text="Distribution Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="sp4_distType" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                        <Label text="Mean (μ):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                        <TextField fx:id="sp4_param1" text="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                        <Label fx:id="sp4_param2Label" text="Std Dev (σ):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="sp4_param2" text="2.5" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                    </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints />
+                                          <ColumnConstraints />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </TitledPane>
+
+                                        <!-- SP5 -->
+                                        <TitledPane text="SP5: Document Verification &amp; Background Check">
+                                            <content>
+                                                <GridPane hgap="10" style="-fx-padding: 10;" vgap="10">
+                                                    <children>
+                                                        <Label text="Distribution Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="sp5_distType" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                        <Label text="Mean (μ):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                        <TextField fx:id="sp5_param1" text="12.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                        <Label fx:id="sp5_param2Label" text="Std Dev (σ):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="sp5_param2" text="2.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                    </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints />
+                                          <ColumnConstraints />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </TitledPane>
+
+                                        <!-- SP6 -->
+                                        <TitledPane text="SP6: Decision Room">
+                                            <content>
+                                                <GridPane hgap="10" style="-fx-padding: 10;" vgap="10">
+                                                    <children>
+                                                        <Label text="Distribution Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="sp6_distType" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                        <Label text="Mean (μ):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                        <TextField fx:id="sp6_param1" text="7.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                        <Label fx:id="sp6_param2Label" text="Std Dev (σ):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                        <TextField fx:id="sp6_param2" text="1.5" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                    </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints />
+                                          <ColumnConstraints />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </TitledPane>
+                                    </panes>
+                                </Accordion>
+                            </children>
+                        </VBox>
+
+                        <!-- Recent Simulations -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 5;">
+                            <children>
+                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Recent Simulations" />
+                                <Separator />
+
+                                <TableView fx:id="recentRunsTable" prefHeight="150">
+                                    <columns>
+                                        <TableColumn fx:id="runIdColumn" prefWidth="80" text="Run ID" />
+                                        <TableColumn fx:id="timestampColumn" prefWidth="180" text="Date &amp; Time" />
+                                        <TableColumn fx:id="totalAppsColumn" prefWidth="100" text="Total Apps" />
+                                        <TableColumn fx:id="approvedColumn" prefWidth="100" text="Approved" />
+                                        <TableColumn fx:id="rejectedColumn" prefWidth="100" text="Rejected" />
+                                        <TableColumn fx:id="avgTimeColumn" prefWidth="120" text="Avg Time (min)" />
+                                    </columns>
+                                </TableView>
+
+                                <HBox spacing="10">
+                                    <children>
+                                        <Button fx:id="loadRunButton" onAction="#handleLoadRun" style="-fx-background-color: #95A5A6; -fx-text-fill: white;" text="View Selected Run" />
+                                        <Button fx:id="deleteRunButton" onAction="#handleDeleteRun" style="-fx-background-color: #E74C3C; -fx-text-fill: white;" text="Delete Selected" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #2C3E50; -fx-padding: 20;">
+            <children>
+                <Button fx:id="startButton" onAction="#handleStart" prefHeight="40" prefWidth="200" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Start Simulation" />
+                <Button onAction="#handleLoadConfig" prefHeight="40" prefWidth="200" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-size: 16px; -fx-cursor: hand;" text="Load Configuration" />
+            </children>
+        </HBox>
+    </bottom>
+
+</BorderPane>
