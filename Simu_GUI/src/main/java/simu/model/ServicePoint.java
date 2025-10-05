@@ -9,11 +9,12 @@ import controller.IControllerMtoV;
 import java.util.LinkedList;
 
 public class ServicePoint {
-    private LinkedList<ApplicationAsCustomer> queue = new LinkedList<>();
-    private ContinuousGenerator generator;
-    private EventList eventList;
-    private EventType eventTypeScheduled;
-    private IControllerMtoV controller;
+
+    private final LinkedList<ApplicationAsCustomer> queue = new LinkedList<>();
+    private final ContinuousGenerator generator;
+    private final EventList eventList;
+    private final EventType eventTypeScheduled;
+    private final IControllerMtoV controller;
 
     // Measurement variables
     private int totalDepartures = 0;
@@ -33,42 +34,45 @@ public class ServicePoint {
         this.controller = controller;
     }
 
-<<<<<<< HEAD
     public String getServicePointName() {
         return eventTypeScheduled.getDisplayName();
     }
 
-=======
->>>>>>> origin/feature-myEngine
     public synchronized void addQueue(ApplicationAsCustomer application) {
         application.setTimeEnteredQueue(Clock.getInstance().getTime());
         queue.add(application);
         maxQueueLength = Math.max(maxQueueLength, queue.size());
-<<<<<<< HEAD
+
         checkBottleneck();
         updateControllerQueueStatus();
         controller.visualiseCustomer();
+
+        // Try to start service immediately if there are free employees
+        beginService();
     }
 
     public synchronized ApplicationAsCustomer removeQueue() {
-        // MyEngine still calls this at END_* events
-        busyServers = Math.max(0, busyServers - 1);
+        if (queue.isEmpty()) return null;
+
+        ApplicationAsCustomer app = queue.poll();
         totalDepartures++;
 
         double now = Clock.getInstance().getTime();
-        if (lastServiceStart > 0) busyTime += now - lastServiceStart;
+        if (lastServiceStart > 0) {
+            busyTime += now - lastServiceStart;
+        }
+        busyServers = Math.max(0, busyServers - 1);
         lastServiceStart = 0;
 
         updateControllerQueueStatus();
 
-        // Try to start another service automatically
+        // Allow next waiting customer to start service if possible
         beginService();
 
-        return null; // kept for API compatibility
+        return app;
     }
 
     public synchronized void beginService() {
-        // Allow as many concurrent services as there are free employees
         while (busyServers < numEmployees && !queue.isEmpty()) {
             ApplicationAsCustomer app = queue.poll();
             if (app == null) break;
@@ -91,52 +95,10 @@ public class ServicePoint {
         }
 
         updateControllerQueueStatus();
-=======
-
-        int currentQueueSize = queue.size();
-        int servicePointId = getServicePointId();
-
-        checkBottleneck();
-
-        // Call controller OUTSIDE synchronized block
-        controller.updateQueueStatus(servicePointId, currentQueueSize);
-        controller.visualiseCustomer();
-    }
-
-    public ApplicationAsCustomer removeQueue() {
-        ApplicationAsCustomer application;
-        int currentQueueSize;
-        int servicePointId;
-
-        synchronized(this) {
-            if (queue.isEmpty()) return null;
-
-            application = queue.poll();
-            reserved = false;
-            totalDepartures++;
-
-            double now = Clock.getInstance().getTime();
-
-            if (lastServiceStart > 0) {
-                double serviceDuration = now - lastServiceStart;
-                if (serviceDuration > 0) {
-                    busyTime += serviceDuration;
-                }
-                lastServiceStart = 0;
-            }
-
-            currentQueueSize = queue.size();
-            servicePointId = getServicePointId();
-        }
-
-        // Call controller OUTSIDE synchronized block
-        controller.updateQueueStatus(servicePointId, currentQueueSize);
-        return application;
->>>>>>> origin/feature-myEngine
     }
 
     public boolean isReserved() {
-        // Tells Engine if at least one employee is busy
+        // True if all employees are busy
         return busyServers >= numEmployees;
     }
 
