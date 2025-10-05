@@ -1,6 +1,5 @@
-package view.controllers;
+package controller;
 
-import controller.Controller;
 import dao.SimulationRunDao;
 import distributionconfiguration.DistributionConfig;
 import entity.SimulationRun;
@@ -23,7 +22,7 @@ public class WelcomeController {
     // Basic Parameters
     @FXML private TextField simulationTimeField;
     @FXML private TextField delayField;
-    @FXML private TextField seedField;
+    //@FXML private TextField seedField;
 
     // Arrival Process Controls
     @FXML private ComboBox<String> arrival_distType;
@@ -78,9 +77,9 @@ public class WelcomeController {
 
     // Buttons
     @FXML private Button startButton;
-    @FXML private Button loadRunButton;
-    @FXML private Button deleteRunButton;
-    @FXML private Accordion distributionAccordion;
+//    @FXML private Button loadRunButton;
+//    @FXML private Button deleteRunButton;
+//    @FXML private Accordion distributionAccordion;
 
     private SimulationRunDao dao = new SimulationRunDao();
 
@@ -209,7 +208,7 @@ public class WelcomeController {
             // Get basic parameters
             double simTime = Double.parseDouble(simulationTimeField.getText());
             long delay = Long.parseLong(delayField.getText());
-            Long seed = seedField.getText().isEmpty() ? null : Long.parseLong(seedField.getText());
+            Long seed = null;  // Remove seed field - always use random seed
 
             // Build distribution configurations
             DistributionConfig[] configs = buildConfigurations();

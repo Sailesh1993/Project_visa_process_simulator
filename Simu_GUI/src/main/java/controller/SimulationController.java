@@ -1,20 +1,14 @@
-package view.controllers;
+package controller;
 
-import controller.Controller;
-import controller.IControllerVtoM;
 import distributionconfiguration.DistributionConfig;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import view.ISimulatorUI;
 import view.IVisualisation;
@@ -84,10 +78,6 @@ public class SimulationController implements ISimulatorUI {
         this.seed = seed;
         this.configs = configs;
 
-//        setupVisualization();
-//        setupQueueStatus();
-//        startSimulation();
-
         Platform.runLater(() -> {
             setupVisualization();
             startSimulation();
@@ -96,8 +86,6 @@ public class SimulationController implements ISimulatorUI {
 
     private void setupVisualization() {
         visualisation = new Visualisation2(1400, 550);
-//        visualisation = new Visualisation2((int)visualizationCanvas.getWidth(),
-//                (int)visualizationCanvas.getHeight());
 
         // Get the actual canvas from Visualisation2
         Canvas visCanvas = (Canvas) visualisation;
@@ -106,34 +94,6 @@ public class SimulationController implements ISimulatorUI {
         StackPane parent = (StackPane) visualizationCanvas.getParent();
         parent.getChildren().remove(visualizationCanvas);
         parent.getChildren().add(visCanvas);
-    }
-
-    private void setupQueueStatus() {
-        for (int i = 0; i < 6; i++) {
-            VBox spBox = new VBox(5);
-            spBox.setPadding(new Insets(10));
-            spBox.setStyle("-fx-background-color: #F8F9FA; -fx-background-radius: 3;");
-
-            Label nameLabel = new Label(servicePointNames[i]);
-            nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
-
-            HBox statusBox = new HBox(10);
-            statusBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-
-            queueLabels[i] = new Label("Queue: 0");
-            queueLabels[i].setStyle("-fx-font-size: 12px;");
-            queueLabels[i].setPrefWidth(100);
-
-            queueBars[i] = new ProgressBar(0);
-            queueBars[i].setPrefWidth(300);
-            queueBars[i].setPrefHeight(20);
-            queueBars[i].setStyle("-fx-accent: #3498DB;");
-
-            statusBox.getChildren().addAll(queueLabels[i], queueBars[i]);
-            spBox.getChildren().addAll(nameLabel, statusBox);
-
-            queueStatusContainer.getChildren().add(spBox);
-        }
     }
 
     private void startSimulation() {
@@ -310,42 +270,6 @@ public class SimulationController implements ISimulatorUI {
         }
     }
 
-    @FXML
-    private void handleAbout() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About");
-        alert.setHeaderText("Visa Application Processing Simulator");
-        alert.setContentText("Version 1.0\n\n" +
-                "A discrete event simulation system for analyzing\n" +
-                "visa application processing workflows.\n\n" +
-                "Developed by Group 7");
-        alert.showAndWait();
-    }
-
-    private void navigateToResults() {
-        try {
-            // Check if stage still exists
-            if (stopButton.getScene() == null || stopButton.getScene().getWindow() == null) {
-                System.out.println("Window already closed, skipping navigation to results");
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/results.fxml"));
-            Scene scene = new Scene(loader.load(), 1600, 900);
-
-            ResultsController resultsController = loader.getController();
-            resultsController.loadLatestRun();
-
-            Stage stage = (Stage) stopButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setTitle("Simulation Results");
-
-        } catch (Exception e) {
-            showError("Navigation Error", "Failed to load results page: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 
     private void showError(String title, String message) {
         Platform.runLater(() -> {

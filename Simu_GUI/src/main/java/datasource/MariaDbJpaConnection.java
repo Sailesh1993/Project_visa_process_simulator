@@ -8,14 +8,20 @@ public class MariaDbJpaConnection {
     private static EntityManager em = null;
 
     public static EntityManager getInstance() {
-
-        if (em==null) {
-            if (emf==null) {
+        if (em == null) {
+            if (emf == null) {
                 emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit");
             }
             em = emf.createEntityManager();
         }
         return em;
+    }
+
+    public static EntityManager createEntityManager() {
+        if (emf == null) {
+            emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit");
+        }
+        return emf.createEntityManager();
     }
 
     public static void shutdown() {

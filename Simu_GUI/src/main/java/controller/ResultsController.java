@@ -1,4 +1,4 @@
-package view.controllers;
+package controller;
 
 import dao.SimulationRunDao;
 import entity.SPResult;
@@ -19,28 +19,50 @@ import java.util.Optional;
 
 public class ResultsController {
 
-    @FXML private ListView<String> runsListView;
-    @FXML private Label runHeaderLabel;
-    @FXML private Label runTimestampLabel;
-    @FXML private Label totalAppsResultLabel;
-    @FXML private Label avgSystemTimeResultLabel;
-    @FXML private Label approvedResultLabel;
-    @FXML private Label rejectedResultLabel;
-    @FXML private TableView<SPResult> servicePointTable;
-    @FXML private TableColumn<SPResult, String> spNameColumn;
-    @FXML private TableColumn<SPResult, Integer> departuresColumn;
-    @FXML private TableColumn<SPResult, Double> avgWaitColumn;
-    @FXML private TableColumn<SPResult, Integer> maxQueueColumn;
-    @FXML private TableColumn<SPResult, Double> utilizationColumn;
-    @FXML private TableColumn<SPResult, Integer> employeesColumn;
-    @FXML private TableColumn<SPResult, String> bottleneckColumn;
-    @FXML private VBox bottleneckPanel;
-    @FXML private Label bottleneckNameLabel;
-    @FXML private Label bottleneckUtilLabel;
-    @FXML private Label bottleneckQueueLabel;
-    @FXML private Label bottleneckWaitLabel;
-    @FXML private Label recommendationLabel;
-    @FXML private TextArea detailedResultsTextArea;
+    @FXML
+    private ListView<String> runsListView;
+    @FXML
+    private Label runHeaderLabel;
+    @FXML
+    private Label runTimestampLabel;
+    @FXML
+    private Label totalAppsResultLabel;
+    @FXML
+    private Label avgSystemTimeResultLabel;
+    @FXML
+    private Label approvedResultLabel;
+    @FXML
+    private Label rejectedResultLabel;
+    @FXML
+    private TableView<SPResult> servicePointTable;
+    @FXML
+    private TableColumn<SPResult, String> spNameColumn;
+    @FXML
+    private TableColumn<SPResult, Integer> departuresColumn;
+    @FXML
+    private TableColumn<SPResult, Double> avgWaitColumn;
+    @FXML
+    private TableColumn<SPResult, Integer> maxQueueColumn;
+    @FXML
+    private TableColumn<SPResult, Double> utilizationColumn;
+    @FXML
+    private TableColumn<SPResult, Integer> employeesColumn;
+    @FXML
+    private TableColumn<SPResult, String> bottleneckColumn;
+    @FXML
+    private VBox bottleneckPanel;
+    @FXML
+    private Label bottleneckNameLabel;
+    @FXML
+    private Label bottleneckUtilLabel;
+    @FXML
+    private Label bottleneckQueueLabel;
+    @FXML
+    private Label bottleneckWaitLabel;
+    @FXML
+    private Label recommendationLabel;
+    @FXML
+    private TextArea detailedResultsTextArea;
 
     private SimulationRunDao dao = new SimulationRunDao();
     private SimulationRun currentRun;

@@ -10,10 +10,9 @@
             <property name="jakarta.persistence.jdbc.user" value="dbuser"/>
             <property name="jakarta.persistence.jdbc.password" value="group7"/>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
-            <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="jakarta.persistence.sql-dialect" value="org.hibernate.dialect.MariaDBDialect"/>
             <property name="hibernate.show_sql" value="true" />
         </properties>
-
     </persistence-unit>
 </persistence>
