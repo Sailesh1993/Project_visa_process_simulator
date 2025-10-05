@@ -42,16 +42,6 @@ public class SimulationRun {
 
     @OneToMany(mappedBy = "simulationRun")
     private List<ApplicationLog> applicationLogs = new ArrayList<>();
-    @Column(name = "run_name")
-    private String runName;
-
-    public String getRunName() {
-        return runName;
-    }
-
-    public void setRunName(String runName) {
-        this.runName = runName;
-    }
 
     public SimulationRun() {this.timestamp = LocalDateTime.now();}
 

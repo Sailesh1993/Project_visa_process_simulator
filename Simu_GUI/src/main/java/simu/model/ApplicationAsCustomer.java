@@ -9,10 +9,7 @@ import java.util.List;
 // TODO:
 // ApplicationAsCustomer to be implemented according to the requirements of the simulation model (data!)
 public class ApplicationAsCustomer {
-<<<<<<< HEAD
     private static final List<ApplicationAsCustomer> allApplications = new ArrayList<>();
-=======
->>>>>>> origin/feature-myEngine
     private static final int MAX_ATTEMPTS = 3;
     private static int idCounter = 1;
     private double arrivalTime;
@@ -63,11 +60,9 @@ public class ApplicationAsCustomer {
         return removalTime;
     }         // Get time when customer has been removed (from the system to be simulated)
 
-<<<<<<< HEAD
+
     public static List<ApplicationAsCustomer> getAllApplications() {return allApplications;}
 
-=======
->>>>>>> origin/feature-myEngine
     public void setRemovalTime(double removalTime) {
         this.removalTime = removalTime;
     }           //Mark the time when the customer has been removed (from the system to be simulated)
@@ -140,11 +135,8 @@ public class ApplicationAsCustomer {
     }
 
     public static void resetIdCounter() {
-<<<<<<< HEAD
         allApplications.clear();
-=======
         idCounter = 1;
->>>>>>> origin/feature-myEngine
     }
 
 

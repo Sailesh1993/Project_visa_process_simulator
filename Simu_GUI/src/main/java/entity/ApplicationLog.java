@@ -36,12 +36,6 @@ public class ApplicationLog {
     @JoinColumn(name = "run_id", nullable = false)
     private SimulationRun simulationRun;
 
-    @Column(name="message", columnDefinition = "TEXT")
-    private String message;
-
-    @Column(name="timestamp")
-    private LocalDateTime timestamp;  // ADD THIS FIELD
-
     public ApplicationLog() {}
 
     public ApplicationLog(int appId, double arrivalTime, double removalTime, boolean approved, double waitingTime) {
@@ -65,6 +59,11 @@ public class ApplicationLog {
 
     public LocalDateTime getTimestamp() { return timestamp; }
 
+    public SimulationRun getSimulationRun() {
+        return simulationRun;
+    }
+
+
     public boolean isApproved() {return approved;}
 
     public double getWaitingTime() {return waitingTime;}
@@ -74,10 +73,6 @@ public class ApplicationLog {
     public void setArrivalTime(double arrivalTime) {this.arrivalTime = arrivalTime;}
 
     public void setRemovalTime(double removalTime) {this.removalTime = removalTime;}
-
-    public void setMessage(String message) { this.message = message; }
-
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
     public void setApproved(boolean approved) {this.approved = approved;}
 

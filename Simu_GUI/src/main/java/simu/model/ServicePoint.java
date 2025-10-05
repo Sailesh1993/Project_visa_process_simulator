@@ -10,10 +10,10 @@ import java.util.LinkedList;
 
 public class ServicePoint {
 
-    private final LinkedList<ApplicationAsCustomer> queue = new LinkedList<>();
-    private final ContinuousGenerator generator;
-    private final EventList eventList;
-    private final EventType eventTypeScheduled;
+    private LinkedList<ApplicationAsCustomer> queue = new LinkedList<>();
+    private ContinuousGenerator generator;
+    private EventList eventList;
+    private EventType eventTypeScheduled;
     private final IControllerMtoV controller;
 
     // Measurement variables
@@ -24,7 +24,7 @@ public class ServicePoint {
     private double lastServiceStart = 0.0;
 
     // Multi-server tracking
-    private int numEmployees = 1;
+    private int numEmployees = 5;
     private int busyServers = 0; // active employees
 
     public ServicePoint(ContinuousGenerator generator, EventList eventList, EventType type, IControllerMtoV controller) {
@@ -34,8 +34,20 @@ public class ServicePoint {
         this.controller = controller;
     }
 
+    public EventType getEventTypeScheduled() {
+        return eventTypeScheduled;
+    }
+
+    public void setEventTypeScheduled(EventType eventTypeScheduled) {
+        this.eventTypeScheduled = eventTypeScheduled;
+    }
+
     public String getServicePointName() {
-        return eventTypeScheduled.getDisplayName();
+        if (eventTypeScheduled == null) {
+            return "Unknown Service Point";
+        }
+        String name = eventTypeScheduled.getServicePointName();
+        return (name != null) ? name : "Unknown Service Point";
     }
 
     public synchronized void addQueue(ApplicationAsCustomer application) {

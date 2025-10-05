@@ -141,15 +141,23 @@ public class MyEngine extends Engine {
 
                 // Create application log entry for persistence
             {
-                ApplicationLog log = new ApplicationLog();
-                StringBuilder msg = new StringBuilder();
-                msg.append("Application ID: ").append(application.getId())
-                        .append(" | Arrival: ").append(application.getArrivalTime())
-                        .append(" | Removal: ").append(application.getRemovalTime())
-                        .append(" | TimeInSystem: ").append(String.format("%.2f", application.getRemovalTime() - application.getArrivalTime()))
-                        .append(" | Approved: ").append(approved);
-                log.setMessage(msg.toString());
+                ApplicationLog log = new ApplicationLog(
+                        application.getId(),
+                        application.getArrivalTime(),
+                        application.getRemovalTime(),
+                        approved,
+                        application.getRemovalTime() - application.getArrivalTime()
+                );
+                log.setMessage(
+                        String.format("App %d | Arr: %.2f | Rem: %.2f | SysTime: %.2f | Approved: %s",
+                                application.getId(),
+                                application.getArrivalTime(),
+                                application.getRemovalTime(),
+                                application.getRemovalTime() - application.getArrivalTime(),
+                                approved)
+                );
                 log.setTimestamp(LocalDateTime.now());
+// simulationRun will be linked later in results()
                 applicationLogs.add(log);
             }
 
@@ -282,9 +290,37 @@ public class MyEngine extends Engine {
         arrivalDc.setSimulationRun(run);
         configs.add(arrivalDc);
 
-        // Persist results and logs
+        // Combine logs from simulation events and summary
+        List<ApplicationLog> logs = new ArrayList<>(applicationLogs);
+
+// Add per-application summary logs (optional)
+        for (ApplicationAsCustomer app : ApplicationAsCustomer.getAllApplications()) {
+            ApplicationLog log = new ApplicationLog();
+            log.setAppId(app.getId());
+            log.setArrivalTime(app.getArrivalTime());
+            log.setRemovalTime(app.getRemovalTime());
+            log.setApproved(app.isApproved());
+            log.setWaitingTime(app.getRemovalTime() - app.getArrivalTime());
+            log.setMessage("Application " + app.getId() + " completed. Approved: " + app.isApproved());
+            log.setTimestamp(LocalDateTime.now());
+            log.setSimulationRun(run);
+
+            logs.add(log);
+
+
+        }
+
+// Link all logs to current simulation run
+        for (ApplicationLog log : logs) {
+            if (log.getSimulationRun() == null) {
+                log.setSimulationRun(run);
+            }
+        }
+
+// Persist everything
         SimulationRunDao dao = new SimulationRunDao();
-        dao.persist(run, configs, spResults, applicationLogs);
+        dao.persist(run, configs, spResults, logs);
+
 
         // Prepare the result string
         StringBuilder resultStr = new StringBuilder();

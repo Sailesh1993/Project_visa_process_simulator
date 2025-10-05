@@ -2,113 +2,85 @@ package simu.model;
 
 import simu.framework.IEventType;
 
-// TODO:
-// Event types are defined by the requirements of the simulation model
 public enum EventType implements IEventType {
 
     ARRIVAL("Application arrives in system!"),
-
     END_APPLICATION_ENTRY("Application entry and appointment booking completed."),
-
     END_DOC_SUBMISSION("Document submission and interview completed."),
-
     END_BIOMETRICS("Biometrics collection completed."),
-
     END_DOC_CHECK("Document verification and background check completed."),
-
     END_DECISION("Decision room processing completed."),
-
     MISSING_DOCS_RESOLVED("Missing documents provided and resolved."),
-
     REAPPLICATION("Application resubmitted after rejection."),
-
     EXIT_APPROVED("Application approved and exited system."),
-
     EXIT_REJECTED("Application rejected and exited system.");
 
-    // Description field for better debugging and logging
     private final String description;
 
-    //Constructor for EventType enum
     EventType(String description) {
         this.description = description;
     }
 
-    //Get the description of this event type
     public String getDescription() {
         return description;
     }
 
-    //Check if this event represents a service completion
     public boolean isServiceCompletion() {
         return this.name().startsWith("END_") &&
                 !this.equals(END_DECISION);
     }
 
-    //Check if this event represents system entry
     public boolean isSystemEntry() {
         return this.equals(ARRIVAL) || this.equals(REAPPLICATION);
     }
 
-    //Check if this event represents system exit
     public boolean isSystemExit() {
         return this.equals(EXIT_APPROVED) || this.equals(EXIT_REJECTED);
     }
 
-    //Check if this event is conditional based on application requirements
     public boolean isConditionalEvent() {
         return this.equals(END_BIOMETRICS) || this.equals(MISSING_DOCS_RESOLVED);
     }
 
-    //Get the next possible events that can follow this event
-    public EventType[] getPossibleNextEvents() {
-        switch (this) {
-            case ARRIVAL:
-                return new EventType[]{END_APPLICATION_ENTRY};
-
-            case END_APPLICATION_ENTRY:
-                return new EventType[]{END_DOC_SUBMISSION};
-
-            case END_DOC_SUBMISSION:
-                return new EventType[]{END_BIOMETRICS, END_DOC_CHECK, MISSING_DOCS_RESOLVED};
-
-            case END_BIOMETRICS:
-                return new EventType[]{END_DOC_CHECK};
-
-            case END_DOC_CHECK:
-                return new EventType[]{END_DECISION};
-
-            case END_DECISION:
-                return new EventType[]{EXIT_APPROVED, REAPPLICATION};
-
-            case MISSING_DOCS_RESOLVED:
-                return new EventType[]{END_DOC_CHECK};
-
-            case REAPPLICATION:
-                return new EventType[]{END_DOC_SUBMISSION};
-
-            case EXIT_APPROVED:
-            case EXIT_REJECTED:
-                return new EventType[]{};
-
-            default:
-                return new EventType[]{};
-        }
-    }
-
-    //Get the service point number associated with this event
+    // Map enum to Service Point index
     public int getServicePointIndex() {
         return switch (this) {
-            case END_APPLICATION_ENTRY ->  0; // SP1: Application Entry & Appointment Booking
-            case END_DOC_SUBMISSION  ->  1; // SP2: Doc Submission room - Interviews
-            case END_BIOMETRICS ->  2; // SP2a: Biometrics room (sub-process of SP2)
-            case MISSING_DOCS_RESOLVED ->  3; // SP2b: Missing Doc waiting room (sub-process of SP2)
-            case END_DOC_CHECK ->  4; // SP3: Doc check room - Backgrounds, verifications
-            case END_DECISION ->  5; // SP4: Decision room - Approve/Reject
-            default ->  1; // Not associated with a specific service point
+            case END_APPLICATION_ENTRY -> 0; // SP1
+            case END_DOC_SUBMISSION -> 1;    // SP2
+            case END_BIOMETRICS -> 2;        // SP2a
+            case MISSING_DOCS_RESOLVED -> 3; // SP2b
+            case END_DOC_CHECK -> 4;         // SP3
+            case END_DECISION -> 5;          // SP4
+            default -> -1;                   // Not associated
         };
     }
 
+    // Human-friendly Service Point names
+    private static final String[] SERVICE_POINT_NAMES = {
+            "Application Entry & Appointment Booking", // SP1
+            "Document Submission Room",                // SP2
+            "Biometrics Room",                         // SP2a
+            "Missing Docs Waiting Room",               // SP2b
+            "Document Check Room",                     // SP3
+            "Decision Room"                            // SP4
+    };
+
+    /**
+     * Returns a human-friendly Service Point name for this event,
+     * or null if the event is not associated with a service point.
+     */
+    public String getServicePointName() {
+        int index = getServicePointIndex();
+        if (index >= 0 && index < SERVICE_POINT_NAMES.length) {
+            return SERVICE_POINT_NAMES[index];
+        } else {
+            return null; // or "Unknown Service Point"
+        }
+    }
+
+    /**
+     * Legacy display name (enum name converted to lowercase with spaces)
+     */
     public String getDisplayName() {
         return name().toLowerCase().replace('_', ' ');
     }
