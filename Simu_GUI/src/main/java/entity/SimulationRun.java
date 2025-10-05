@@ -32,28 +32,21 @@ public class SimulationRun {
     @Column(name = "Saved_config")
     private boolean configSaved;
 
-    @OneToMany(mappedBy = "simulationRun")
-    private List<DistConfig> distributionConfigs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "simulationRun")
-    private List<SPResult> servicePointResults = new ArrayList<>();
-
-    @OneToMany(mappedBy = "simulationRun")
-    private List<ApplicationLog> applicationLogs = new ArrayList<>();
     @Column(name = "run_name")
     private String runName;
 
-    public String getRunName() {
-        return runName;
-    }
+    @OneToMany(mappedBy = "simulationRun", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DistConfig> distributionConfigs = new ArrayList<>();
 
-    public void setRunName(String runName) {
-        this.runName = runName;
-    }
+    @OneToMany(mappedBy = "simulationRun", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SPResult> servicePointResults = new ArrayList<>();
+
+    @OneToMany(mappedBy = "simulationRun", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ApplicationLog> applicationLogs = new ArrayList<>();
 
     public SimulationRun() {}
 
-    //getters
+    // Getters
     public Long getId() {return id;}
 
     public LocalDateTime getTimestamp() {return timestamp;}
@@ -68,13 +61,15 @@ public class SimulationRun {
 
     public boolean isConfigSaved() {return configSaved;}
 
+    public String getRunName() {return runName;}
+
     public List<DistConfig> getDistConfiguration() {return distributionConfigs;}
 
     public List<SPResult> getServicePointResults() {return servicePointResults;}
 
     public List<ApplicationLog> getApplicationLogs() {return applicationLogs;}
 
-    //setters
+    // Setters
     public void setTimestamp(LocalDateTime timestamp) {this.timestamp = timestamp;}
 
     public void setTotalApplications(int totalApplications) {this.totalApplications = totalApplications;}
@@ -86,6 +81,8 @@ public class SimulationRun {
     public void setAvgSystemTime(double avgSystemTime) {this.avgSystemTime = avgSystemTime;}
 
     public void setConfigSaved(boolean configSaved) {this.configSaved = configSaved;}
+
+    public void setRunName(String runName) {this.runName = runName;}
 
     public void setDistConfiguration(List<DistConfig> distributionConfigs) {
         this.distributionConfigs = distributionConfigs;

@@ -63,17 +63,15 @@ public class SimulationRunDao {
     public SimulationRun find(Long id) {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            // Use JOIN FETCH to eagerly load lists (assumes mappings in SimulationRun exist)
-            // Adjust property names if your SimulationRun fields have different names
-            TypedQuery<SimulationRun> q = em.createQuery(
-                    "SELECT r FROM SimulationRun r " +
-                            "LEFT JOIN FETCH r.distributionConfigs dc " +
-                            "LEFT JOIN FETCH r.servicePointResults spr " +
-                            "LEFT JOIN FETCH r.applicationLogs al " +
-                            "WHERE r.id = :id", SimulationRun.class);
-            q.setParameter("id", id);
-            List<SimulationRun> results = q.getResultList();
-            return results.isEmpty() ? null : results.get(0);
+            SimulationRun run = em.find(SimulationRun.class, id);
+
+            if (run != null) {
+                run.getDistConfiguration().size();
+                run.getServicePointResults().size();
+                run.getApplicationLogs().size();
+            }
+
+            return run;
         } finally {
             em.close();
         }

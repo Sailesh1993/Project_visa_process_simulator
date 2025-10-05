@@ -332,10 +332,6 @@ public class WelcomeController {
         }
     }
 
-    @FXML
-    private void handleLoadConfig() {
-        showInfo("Load Configuration", "This feature will allow loading saved configurations in future versions.");
-    }
 
     @FXML
     private void handleLoadRun() {

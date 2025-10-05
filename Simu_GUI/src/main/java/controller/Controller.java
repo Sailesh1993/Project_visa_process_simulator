@@ -28,7 +28,6 @@ public class Controller implements IControllerVtoM, IControllerMtoV {
 		engine.setDelay(ui.getDelay());
 		ui.getVisualisation().clearDisplay();
 		((Thread) engine).start();
-
 	}
 	
 	@Override
@@ -78,5 +77,9 @@ public class Controller implements IControllerVtoM, IControllerMtoV {
                 ((SimulationController) ui).updateStatistics(totalApps, approved, rejected, avgTime, currentTime);
             }
         });
+    }
+    @Override // for pause and stop button
+    public IEngine getEngine() {
+        return engine;
     }
 }

@@ -5,4 +5,8 @@ public interface IEngine { // NEW
 	public void setSimulationTime(double time);
 	public void setDelay(long time);
 	public long getDelay();
+    void pause();
+    void resume();
+    void stopSimulation();
+    boolean isStopped();
 }

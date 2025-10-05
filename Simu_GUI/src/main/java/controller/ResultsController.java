@@ -59,8 +59,8 @@ public class ResultsController {
     private Label bottleneckQueueLabel;
     @FXML
     private Label bottleneckWaitLabel;
-    @FXML
-    private Label recommendationLabel;
+//    @FXML
+//    private Label recommendationLabel;
     @FXML
     private TextArea detailedResultsTextArea;
 
@@ -208,6 +208,8 @@ public class ResultsController {
             return;
         }
         loadSimulationRun(allRuns.get(index).getId());
+        runsListView.getSelectionModel().select(index); // To load
+
     }
 
     @FXML
@@ -248,25 +250,6 @@ public class ResultsController {
         }
     }
 
-    @FXML
-    private void handleExportPDF() {
-        showInfo("Not Implemented", "PDF export coming in future version.");
-    }
-
-    @FXML
-    private void handleExportCSV() {
-        showInfo("Not Implemented", "CSV export coming in future version.");
-    }
-
-    @FXML
-    private void handleCompare() {
-        showInfo("Not Implemented", "Compare feature coming in future version.");
-    }
-
-    @FXML
-    private void handleViewAll() {
-        loadAllRuns();
-    }
 
     @FXML
     private void handleAbout() {
