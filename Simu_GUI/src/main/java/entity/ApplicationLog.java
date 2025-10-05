@@ -1,6 +1,7 @@
 package entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 import java.time.LocalDateTime;
 
@@ -28,11 +29,18 @@ public class ApplicationLog {
     private LocalDateTime timestamp;
 
     private boolean approved;
+
     private double waitingTime;
 
     @ManyToOne
     @JoinColumn(name = "run_id", nullable = false)
     private SimulationRun simulationRun;
+
+    @Column(name="message", columnDefinition = "TEXT")
+    private String message;
+
+    @Column(name="timestamp")
+    private LocalDateTime timestamp;  // ADD THIS FIELD
 
     public ApplicationLog() {}
 
@@ -76,4 +84,12 @@ public class ApplicationLog {
     public void setWaitingTime(double waitingTime) {this.waitingTime = waitingTime;}
 
     public void setSimulationRun(SimulationRun run) {this.simulationRun = run;}
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 }

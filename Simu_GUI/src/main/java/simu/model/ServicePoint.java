@@ -33,14 +33,18 @@ public class ServicePoint {
         this.controller = controller;
     }
 
+<<<<<<< HEAD
     public String getServicePointName() {
         return eventTypeScheduled.getDisplayName();
     }
 
+=======
+>>>>>>> origin/feature-myEngine
     public synchronized void addQueue(ApplicationAsCustomer application) {
         application.setTimeEnteredQueue(Clock.getInstance().getTime());
         queue.add(application);
         maxQueueLength = Math.max(maxQueueLength, queue.size());
+<<<<<<< HEAD
         checkBottleneck();
         updateControllerQueueStatus();
         controller.visualiseCustomer();
@@ -87,6 +91,48 @@ public class ServicePoint {
         }
 
         updateControllerQueueStatus();
+=======
+
+        int currentQueueSize = queue.size();
+        int servicePointId = getServicePointId();
+
+        checkBottleneck();
+
+        // Call controller OUTSIDE synchronized block
+        controller.updateQueueStatus(servicePointId, currentQueueSize);
+        controller.visualiseCustomer();
+    }
+
+    public ApplicationAsCustomer removeQueue() {
+        ApplicationAsCustomer application;
+        int currentQueueSize;
+        int servicePointId;
+
+        synchronized(this) {
+            if (queue.isEmpty()) return null;
+
+            application = queue.poll();
+            reserved = false;
+            totalDepartures++;
+
+            double now = Clock.getInstance().getTime();
+
+            if (lastServiceStart > 0) {
+                double serviceDuration = now - lastServiceStart;
+                if (serviceDuration > 0) {
+                    busyTime += serviceDuration;
+                }
+                lastServiceStart = 0;
+            }
+
+            currentQueueSize = queue.size();
+            servicePointId = getServicePointId();
+        }
+
+        // Call controller OUTSIDE synchronized block
+        controller.updateQueueStatus(servicePointId, currentQueueSize);
+        return application;
+>>>>>>> origin/feature-myEngine
     }
 
     public boolean isReserved() {

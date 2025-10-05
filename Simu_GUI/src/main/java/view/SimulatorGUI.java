@@ -2,6 +2,7 @@ package view;
 
 import java.text.DecimalFormat;
 import controller.*;
+import distributionconfiguration.DistributionConfig;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -60,9 +61,10 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
             if (controller == null) {
                 // Create controller only when user clicks Start, passing values from fields
                 long seed = System.currentTimeMillis(); // or read from another TextField if GUI has it
-                String configs = "default-config";      // replace with actual config input
-                controller = new Controller(this);
+                DistributionConfig[] configs =;      // replace with actual config input
+                controller = new Controller(this, configs, seed);
             }
+
                 controller.startSimulation();
                 startButton.setDisable(true);
             });

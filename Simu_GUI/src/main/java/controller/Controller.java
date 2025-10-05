@@ -5,8 +5,9 @@ import javafx.application.Platform;
 import simu.framework.IEngine;
 import simu.model.MyEngine;
 import view.ISimulatorUI;
+import view.IVisualisation;
 
-public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
+public class Controller implements IControllerVtoM, IControllerMtoV {
 	private IEngine engine;
 	private ISimulatorUI ui;
 
@@ -27,16 +28,16 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		engine.setDelay(ui.getDelay());
 		ui.getVisualisation().clearDisplay();
 		((Thread) engine).start();
-		//((Thread)engine).run(); // Never like this, why?
+
 	}
 	
 	@Override
-	public void decreaseSpeed() { // hidastetaan moottorisäiettä
+	public void decreaseSpeed() {
 		engine.setDelay((long)(engine.getDelay()*1.10));
 	}
 
 	@Override
-	public void increaseSpeed() { // nopeutetaan moottorisäiettä
+	public void increaseSpeed() {
 		engine.setDelay((long)(engine.getDelay()*0.9));
 	}
 
@@ -63,6 +64,19 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
     public void displayResults(String resultsText) {
         Platform.runLater(() -> {
             ui.displayResults(resultsText);                 //Calling method in SimulatorGUI to update results Label
+        });
+    }
+    @Override
+    public IVisualisation getVisualisation() {
+        return ui.getVisualisation();
+    }
+
+    @Override
+    public void updateStatistics(int totalApps, int approved, int rejected, double avgTime, double currentTime) {
+        Platform.runLater(() -> {
+            if (ui instanceof SimulationController) {
+                ((SimulationController) ui).updateStatistics(totalApps, approved, rejected, avgTime, currentTime);
+            }
         });
     }
 }

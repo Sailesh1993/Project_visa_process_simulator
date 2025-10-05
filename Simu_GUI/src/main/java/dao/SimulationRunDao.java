@@ -1,7 +1,14 @@
 package dao;
 
 import datasource.MariaDbJpaConnection;
+<<<<<<< HEAD
 import entity.*;
+=======
+import entity.ApplicationLog;
+import entity.DistConfig;
+import entity.SimulationRun;
+import entity.SPResult;
+>>>>>>> origin/feature-myEngine
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 

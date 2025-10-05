@@ -65,11 +65,24 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 	private double currentTime(){
 		return eventList.getNextTime();
 	}
-	
-	private boolean simulate() {
-		Trace.out(Trace.Level.INFO, "Time is: " + clock.getTime());
-		return clock.getTime() < simulationTime;
-	}
+
+    private boolean simulate() {
+        Trace.out(Trace.Level.INFO, "Time is: " + clock.getTime());
+
+        // Force stop if we've reached simulation time
+        if (clock.getTime() >= simulationTime) {
+            return false;
+        }
+
+        // Also stop if event list is empty (nothing left to do)
+        // Also stop if event list is empty (nothing left to do)
+        if (eventList.isEmpty()) {
+            Trace.out(Trace.Level.INFO, "Event list empty at time " + clock.getTime());
+            return false;
+        }
+
+        return true;
+    }
 
 	private void delay() { // NEW
 		Trace.out(Trace.Level.INFO, "Delay " + delay);

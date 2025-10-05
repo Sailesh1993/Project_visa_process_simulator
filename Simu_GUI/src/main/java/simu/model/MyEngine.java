@@ -32,7 +32,11 @@ public class MyEngine extends Engine {
     private int exitedRejectedCount = 0;
 
     public MyEngine(IControllerMtoV controller, DistributionConfig[] configs, Long seed){ // NEW
+<<<<<<< HEAD
         super(controller);// NEW(Pass controller to Engine)
+=======
+		super(controller);// NEW(Pass controller to Engine)
+>>>>>>> origin/feature-myEngine
         Clock.getInstance().reset();// for new simulation
         this.controller = controller;
         this.userConfigs = configs;
@@ -74,6 +78,7 @@ public class MyEngine extends Engine {
             case END_APPLICATION_ENTRY:             // Application Entry & Appointment Booking done, move to Document Submission & Interview
                 application = servicePoints[0].removeQueue();
                 application.setCurrentStage(EventType.END_DOC_SUBMISSION);
+                controller.getVisualisation().moveCustomer(0, 1, false);
                 servicePoints[1].addQueue(application);
                 controller.updateQueueStatus(0, servicePoints[0].getQueueSize());
                 break;
@@ -81,39 +86,41 @@ public class MyEngine extends Engine {
             case END_DOC_SUBMISSION:                                // Document Submission & Interview done, move to conditional Service points
                 application = servicePoints[1].removeQueue();
                 if (application.requiresBiometrics()) {
+                    controller.getVisualisation().moveCustomer(1, 2, false);
                     servicePoints[2].addQueue(application);         // Move to Biometrics Collection
                 } else if (!application.isDocsComplete()) {
+                    controller.getVisualisation().moveCustomer(1, 3, false);
                     servicePoints[3].addQueue(application);         // Move to Missing Documents Resolution
                 } else {
+                    controller.getVisualisation().moveCustomer(1, 4, false);
                     servicePoints[4].addQueue(application);         // Move to Document Verification & Background Check
                 }
-
                 controller.updateQueueStatus(1, servicePoints[1].getQueueSize());           //Update UI
                 break;
 
             case END_BIOMETRICS:
                 application = servicePoints[2].removeQueue();
+                controller.getVisualisation().moveCustomer(2, 4, false);
 
                 if (application.requiresBiometrics()) {
                     double timeInBiometrics = Clock.getInstance().getTime() - application.getTimeEnteredQueue();
                     application.setTimeInBiometrics(timeInBiometrics);
                 }
                 servicePoints[4].addQueue(application);             // move to Document Verification & Background Check
-
                 controller.updateQueueStatus(2, servicePoints[2].getQueueSize());           //Update UI
                 break;
 
             case MISSING_DOCS_RESOLVED:
                 application = servicePoints[3].removeQueue();
+                controller.getVisualisation().moveCustomer(3, 4, false);  // Add animation
                 servicePoints[4].addQueue(application);             // move from [4] Missing Documents Resolution to [5] Document Verification & Background Check
-
                 controller.updateQueueStatus(3, servicePoints[3].getQueueSize());           //Update UI
                 break;
 
             case END_DOC_CHECK:
                 application = servicePoints[4].removeQueue();
+                controller.getVisualisation().moveCustomer(4, 5, false);  // Add animation
                 servicePoints[5].addQueue(application); // move to [6] Decision Room
-
                 controller.updateQueueStatus(4, servicePoints[4].getQueueSize());           //Update UI
                 break;
 
@@ -124,13 +131,33 @@ public class MyEngine extends Engine {
                 boolean approved = randomGenerator.nextDouble() < 0.7;
                 application.setApproved(approved);
 
+                // ADD THIS BLOCK HERE - Create application log
+                ApplicationLog log = new ApplicationLog();
+                StringBuilder msg = new StringBuilder();
+                msg.append("Application ID: ").append(application.getId())
+                        .append(" | Arrival: ").append(application.getArrivalTime())
+                        .append(" | Removal: ").append(application.getRemovalTime())
+                        .append(" | TimeInSystem: ").append(String.format("%.2f", application.getRemovalTime() - application.getArrivalTime()))
+                        .append(" | Approved: ").append(approved);
+                log.setMessage(msg.toString());
+                log.setTimestamp(LocalDateTime.now());
+                applicationLogs.add(log);
+                // END OF ADDED BLOCK
+
+                // Animate customer leaving with approval status
+                controller.getVisualisation().moveCustomer(5, -1, approved);
+
                 totalApplications++;
                 if (approved) approvedCount++;
                 else rejectedCount++;
 
                 totalSystemTime += application.getRemovalTime() - application.getArrivalTime();
 
+<<<<<<< HEAD
                 // NEW: Update UI with current statistics
+=======
+                // Update UI with current statistics
+>>>>>>> origin/feature-myEngine
                 double avgTime = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
                 controller.updateStatistics(totalApplications, approvedCount, rejectedCount, avgTime, Clock.getInstance().getTime());
 
@@ -138,6 +165,7 @@ public class MyEngine extends Engine {
                 EventType exitEvent = approved ? EventType.EXIT_APPROVED : EventType.EXIT_REJECTED;
                 eventList.add(new Event(exitEvent, Clock.getInstance().getTime()));
 
+<<<<<<< HEAD
                 // Create and collect an ApplicationLog record for persistence
                 ApplicationLog log = new ApplicationLog();
                 StringBuilder msg = new StringBuilder();
@@ -149,6 +177,10 @@ public class MyEngine extends Engine {
                 log.setMessage(msg.toString());
                 log.setTimestamp(LocalDateTime.now());
                 applicationLogs.add(log);
+=======
+
+
+>>>>>>> origin/feature-myEngine
 
                 application.reportResults();
 
@@ -174,7 +206,6 @@ public class MyEngine extends Engine {
                 break;
         }
     }
-
     @Override
     protected void tryCEvents() {
         for (ServicePoint servicePoint: servicePoints){
@@ -185,7 +216,11 @@ public class MyEngine extends Engine {
         }
     }
 
+<<<<<<< HEAD
     @Override
+=======
+	@Override
+>>>>>>> origin/feature-myEngine
     protected void results() {
         // NEW GUI
         double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
@@ -262,6 +297,7 @@ public class MyEngine extends Engine {
         arrivalDc.setSimulationRun(run);
         configs.add(arrivalDc);
 
+<<<<<<< HEAD
         List<ApplicationLog> logs = new ArrayList<>();
         for (ApplicationAsCustomer app : ApplicationAsCustomer.getAllApplications()) {
             ApplicationLog log = new ApplicationLog();
@@ -280,6 +316,12 @@ public class MyEngine extends Engine {
             SimulationRunDao dao = new SimulationRunDao();
             dao.persist(run, configs, spResults, logs);
         }
+=======
+
+        // Persist to database
+        SimulationRunDao dao = new SimulationRunDao();
+        dao.persist(run, configs, spResults, applicationLogs);
+>>>>>>> origin/feature-myEngine
 
         // Prepare the result string
         StringBuilder resultStr = new StringBuilder();

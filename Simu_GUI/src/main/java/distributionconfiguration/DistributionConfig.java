@@ -25,6 +25,17 @@ public class DistributionConfig {
         this.forArrival = forArrival;
 
     }
+    public String getType() {
+        return this.type;
+    }
+
+    public double getParam1() {
+        return this.param1;
+    }
+
+    public double getParam2() {
+        return this.param2;
+    }
 
     public ContinuousGenerator buildGenerator() {
         switch (type) {

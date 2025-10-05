@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #ECF0F1;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.SimulationController">
+
+    <!-- Top: Menu Bar & Title -->
+    <top>
+        <VBox>
+            <MenuBar>
+                <Menu text="File">
+                    <MenuItem onAction="#handleStop" text="Stop Simulation" />
+                    <SeparatorMenuItem />
+                    <MenuItem onAction="#handleReturnToWelcome" text="Return to Home" />
+                    <SeparatorMenuItem />
+                    <MenuItem onAction="#handleGoToResult" text="Go to result" />
+                </Menu>
+            </MenuBar>
+
+            <!-- Title Bar -->
+            <HBox alignment="CENTER" spacing="10" style="-fx-background-color: #2C3E50; -fx-padding: 15;">
+                <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="SIMULATION IN PROGRESS" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="simulationStatusLabel" style="-fx-font-size: 14px; -fx-text-fill: #27AE60; -fx-font-weight: bold;" text="Running...">
+                    <font>
+                        <Font size="15.0" />
+                    </font></Label>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Center: Scrollable Content -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #ECF0F1;">
+            <VBox spacing="15" style="-fx-padding: 20;">
+
+                <!-- Compact Live Statistics Panel -->
+                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 5;">
+
+                    <!-- Time & Progress -->
+                    <VBox prefWidth="200" spacing="3">
+                        <Label style="-fx-font-size: 10px; -fx-text-fill: #7F8C8D;" text="Time Elapsed" />
+                        <Label fx:id="timeElapsedLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="0.00 / 1000 min" />
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="40" />
+
+                    <!-- Applications -->
+                    <VBox prefWidth="150" spacing="3">
+                        <Label style="-fx-font-size: 10px; -fx-text-fill: #7F8C8D;" text="Applications" />
+                        <Label fx:id="totalAppsLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="0" />
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="40" />
+
+                    <!-- Approved -->
+                    <VBox prefWidth="120" spacing="3">
+                        <Label style="-fx-font-size: 10px; -fx-text-fill: #7F8C8D;" text="Approved" />
+                        <Label fx:id="approvedLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #27AE60;" text="0 (0%)" />
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="40" />
+
+                    <!-- Rejected -->
+                    <VBox prefWidth="120" spacing="3">
+                        <Label style="-fx-font-size: 10px; -fx-text-fill: #7F8C8D;" text="Rejected" />
+                        <Label fx:id="rejectedLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #E74C3C;" text="0 (0%)" />
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="40" />
+
+                    <!-- Avg Time -->
+                    <VBox prefWidth="120" spacing="3">
+                        <Label style="-fx-font-size: 10px; -fx-text-fill: #7F8C8D;" text="Avg Time" />
+                        <Label fx:id="avgTimeLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3498DB;" text="0.00 min" />
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="40" />
+
+                    <!-- Speed -->
+                    <VBox prefWidth="100" spacing="3">
+                        <Label style="-fx-font-size: 10px; -fx-text-fill: #7F8C8D;" text="Speed" />
+                        <Label fx:id="speedLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="1.0x" />
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <!-- Progress -->
+                    <VBox alignment="CENTER_RIGHT" prefWidth="250" spacing="3">
+                        <Label style="-fx-font-size: 10px; -fx-text-fill: #7F8C8D;" text="Progress" />
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <ProgressBar fx:id="progressBar" prefHeight="18" prefWidth="180" progress="0.0" style="-fx-accent: #3498DB;" />
+                            <Label fx:id="progressPercentLabel" style="-fx-font-size: 11px; -fx-text-fill: #7F8C8D; -fx-font-weight: bold;" text="0.0%" />
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Larger Visualization Canvas -->
+                <VBox spacing="8" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Live Visualization" />
+                    <Separator />
+
+                    <StackPane style="-fx-border-color: #BDC3C7; -fx-border-width: 1; -fx-border-radius: 3;">
+                        <Canvas fx:id="visualizationCanvas" height="550" width="1400" />
+                    </StackPane>
+                </VBox>
+
+                <!-- Hidden Queue Status Container (kept for code compatibility) -->
+                <VBox fx:id="queueStatusContainer" managed="false" spacing="10" visible="false" />
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- Bottom: Control Buttons -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="15" style="-fx-background-color: #2C3E50; -fx-padding: 15;">
+            <Button fx:id="pauseButton" onAction="#handlePause" prefHeight="35" prefWidth="140" style="-fx-background-color: #F39C12; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;" text="Pause" />
+            <Button fx:id="speedUpButton" onAction="#handleSpeedUp" prefHeight="35" prefWidth="140" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;" text="Speed Up" />
+            <Button fx:id="slowDownButton" onAction="#handleSlowDown" prefHeight="35" prefWidth="140" style="-fx-background-color: #9B59B6; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;" text="Slow Down" />
+            <Button fx:id="stopButton" onAction="#handleStop" prefHeight="35" prefWidth="140" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;" text="Stop" />
+        </HBox>
+    </bottom>
+
+</BorderPane>
