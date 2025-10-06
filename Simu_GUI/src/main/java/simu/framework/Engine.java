@@ -6,7 +6,9 @@ import simu.model.ServicePoint;
 public abstract class Engine extends Thread implements IEngine {  // NEW DEFINITIONS
 	private double simulationTime = 0;	// time when the simulation will be stopped
 	private long delay = 0;
-	private Clock clock;				// in order to simplify the code (clock.getClock() instead Clock.getInstance().getClock())
+	private Clock clock;
+    private volatile boolean paused = false;
+    private volatile boolean stopped = false;// in order to simplify the code (clock.getClock() instead Clock.getInstance().getClock())
 	
 	protected EventList eventList;
 	protected ServicePoint[] servicePoints;
@@ -33,20 +35,36 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 	public long getDelay() {
 		return delay;
 	}
-	
-	@Override
-	public void run() {
-		initialization(); // creating, e.g., the first event
 
-		while (simulate()){
-			delay(); // NEW
-			clock.setTime(currentTime());
-			runBEvents();
-			tryCEvents();
-		}
+    @Override
+    public void run() {
+        initialization();
 
-		results();
-	}
+        while (simulate() && !stopped) {
+
+            // Check if paused
+            synchronized(this) {
+                while (paused && !stopped) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        stopped = true;
+                        break;
+                    }
+                }
+            }
+
+            if (stopped) break;
+
+            delay();
+            clock.setTime(currentTime());
+            runBEvents();
+            tryCEvents();
+        }
+
+        results();
+    }
+
 	
 	private void runBEvents() {
 		while (eventList.getNextTime() == clock.getTime()){
@@ -92,6 +110,24 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 			e.printStackTrace();
 		}
 	}
+    //For buttons in simulation page
+    public void pause() {
+        paused = true;
+    }
+
+    public void resume() {
+        paused = false;
+        synchronized(this) {
+            notifyAll();
+        }
+    }
+    public void stopSimulation() {
+        stopped = true;
+    }
+
+    public boolean isStopped() {
+        return stopped;
+    }
 
 	protected abstract void initialization(); 	// Defined in simu.model-package's class who is inheriting the Engine class
 	protected abstract void runEvent(Event t);	// Defined in simu.model-package's class who is inheriting the Engine class

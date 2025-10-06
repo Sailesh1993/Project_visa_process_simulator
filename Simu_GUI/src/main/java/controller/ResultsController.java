@@ -5,12 +5,11 @@ import entity.SPResult;
 import entity.SimulationRun;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import view.HomeView;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -59,8 +58,8 @@ public class ResultsController {
     private Label bottleneckQueueLabel;
     @FXML
     private Label bottleneckWaitLabel;
-    @FXML
-    private Label recommendationLabel;
+//    @FXML
+//    private Label recommendationLabel;
     @FXML
     private TextArea detailedResultsTextArea;
 
@@ -208,6 +207,8 @@ public class ResultsController {
             return;
         }
         loadSimulationRun(allRuns.get(index).getId());
+        runsListView.getSelectionModel().select(index); // To load
+
     }
 
     @FXML
@@ -235,38 +236,18 @@ public class ResultsController {
         });
     }
 
+
+
     @FXML
-    private void handleNewSimulation() {
+    private void navigateToHome() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/welcome.fxml"));
-            Scene scene = new Scene(loader.load(), 1600, 900);
             Stage stage = (Stage) servicePointTable.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Visa Application Simulator");
+            HomeView.show(stage);
         } catch (Exception e) {
             showError("Navigation Error", e.getMessage());
         }
     }
 
-    @FXML
-    private void handleExportPDF() {
-        showInfo("Not Implemented", "PDF export coming in future version.");
-    }
-
-    @FXML
-    private void handleExportCSV() {
-        showInfo("Not Implemented", "CSV export coming in future version.");
-    }
-
-    @FXML
-    private void handleCompare() {
-        showInfo("Not Implemented", "Compare feature coming in future version.");
-    }
-
-    @FXML
-    private void handleViewAll() {
-        loadAllRuns();
-    }
 
     @FXML
     private void handleAbout() {

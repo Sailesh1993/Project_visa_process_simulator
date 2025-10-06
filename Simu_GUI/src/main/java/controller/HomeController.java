@@ -6,18 +6,18 @@ import entity.SimulationRun;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import view.ResultView;
+import view.SimulationView;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-public class WelcomeController {
+public class HomeController {
 
     // Basic Parameters
     @FXML private TextField simulationTimeField;
@@ -77,9 +77,6 @@ public class WelcomeController {
 
     // Buttons
     @FXML private Button startButton;
-//    @FXML private Button loadRunButton;
-//    @FXML private Button deleteRunButton;
-//    @FXML private Accordion distributionAccordion;
 
     private SimulationRunDao dao = new SimulationRunDao();
 
@@ -87,6 +84,7 @@ public class WelcomeController {
     private void initialize() {
         setupDistributionComboBoxes();
         setupDistributionListeners();
+        updateParameterFields("Normal", arrival_param2, arrival_param2Label); // set default
         loadRecentRuns();
         setupTableColumns();
     }
@@ -95,25 +93,25 @@ public class WelcomeController {
         ObservableList<String> distTypes = FXCollections.observableArrayList("Normal", "Negexp", "Gamma");
 
         arrival_distType.setItems(distTypes);
-        arrival_distType.setValue("Negexp"); // Set default value
+        arrival_distType.setValue("Normal"); // Set default value
 
         sp1_distType.setItems(distTypes);
-        sp1_distType.setValue("Normal");
+        sp1_distType.setValue("Negexp");
 
         sp2_distType.setItems(distTypes);
-        sp2_distType.setValue("Normal");
+        sp2_distType.setValue("Negexp");
 
         sp3_distType.setItems(distTypes);
         sp3_distType.setValue("Normal");
 
         sp4_distType.setItems(distTypes);
-        sp4_distType.setValue("Normal");
+        sp4_distType.setValue("Negexp");
 
         sp5_distType.setItems(distTypes);
-        sp5_distType.setValue("Normal");
+        sp5_distType.setValue("Gamma");
 
         sp6_distType.setItems(distTypes);
-        sp6_distType.setValue("Normal");
+        sp6_distType.setValue("Gamma");
     }
 
     private void setupDistributionListeners() {
@@ -315,26 +313,12 @@ public class WelcomeController {
 
     private void navigateToSimulation(double simTime, long delay, Long seed, DistributionConfig[] configs) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/simulation.fxml"));
-            Scene scene = new Scene(loader.load());
-
-            SimulationController simController = loader.getController();
-            simController.initialize(simTime, delay, seed, configs);
-
             Stage stage = (Stage) startButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setTitle("Simulation Running");
-
+            SimulationView.show(stage, simTime, delay, seed, configs);
         } catch (Exception e) {
             showError("Navigation Error", "Failed to load simulation page: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    @FXML
-    private void handleLoadConfig() {
-        showInfo("Load Configuration", "This feature will allow loading saved configurations in future versions.");
     }
 
     @FXML
@@ -373,17 +357,15 @@ public class WelcomeController {
         }
     }
 
+
     private void navigateToResults(Long runId) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/results.fxml"));
-            Scene scene = new Scene(loader.load(), 1600, 900);
+            Stage stage = (Stage) startButton.getScene().getWindow();
 
-            ResultsController resultsController = loader.getController();
+            // Load results view and get controller
+            ResultsController resultsController = ResultView.show(stage);
             resultsController.loadSimulationRun(runId);
 
-            Stage stage = (Stage) startButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
             stage.setTitle("Simulation Results");
 
         } catch (Exception e) {

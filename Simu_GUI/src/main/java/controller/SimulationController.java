@@ -3,16 +3,12 @@ package controller;
 import distributionconfiguration.DistributionConfig;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import view.ISimulatorUI;
-import view.IVisualisation;
-import view.Visualisation2;
+import view.*;
 
 public class SimulationController implements ISimulatorUI {
 
@@ -42,6 +38,7 @@ public class SimulationController implements ISimulatorUI {
     @FXML private Button slowDownButton;
     @FXML private Button stopButton;
 
+
     // Backend
     private IControllerVtoM controller;
     private IVisualisation visualisation;
@@ -52,7 +49,7 @@ public class SimulationController implements ISimulatorUI {
     private Long seed;
     private DistributionConfig[] configs;
 
-    // Statistics tracking
+    // Initial state
     private int currentTotalApps = 0;
     private int currentApproved = 0;
     private int currentRejected = 0;
@@ -63,14 +60,9 @@ public class SimulationController implements ISimulatorUI {
     // Queue status UI elements
     private ProgressBar[] queueBars = new ProgressBar[6];
     private Label[] queueLabels = new Label[6];
-    private String[] servicePointNames = {
-            "SP1: Application Entry",
-            "SP2: Document Submission",
-            "SP3: Biometrics Collection",
-            "SP4: Missing Documents",
-            "SP5: Document Verification",
-            "SP6: Decision Room"
-    };
+
+    private volatile boolean simulationRunning = true;
+    private volatile boolean simulationComplete = false;
 
     public void initialize(double simTime, long delay, Long seed, DistributionConfig[] configs) {
         this.simulationTime = simTime;
@@ -85,7 +77,7 @@ public class SimulationController implements ISimulatorUI {
     }
 
     private void setupVisualization() {
-        visualisation = new Visualisation2(1400, 550);
+        visualisation = new Animation(1400, 550);
 
         // Get the actual canvas from Visualisation2
         Canvas visCanvas = (Canvas) visualisation;
@@ -97,6 +89,10 @@ public class SimulationController implements ISimulatorUI {
     }
 
     private void startSimulation() {
+        // to check simulation
+        simulationRunning = true;
+        simulationComplete = false;
+
         // Initialize trace level to prevent null pointer
         simu.framework.Trace.setTraceLevel(simu.framework.Trace.Level.INFO);
 
@@ -127,6 +123,9 @@ public class SimulationController implements ISimulatorUI {
         Platform.runLater(() -> {
             simulationStatusLabel.setText("Completed ✓");
             simulationStatusLabel.setStyle("-fx-text-fill: #27AE60; -fx-font-weight: bold;");
+            simulationRunning = false;
+            simulationComplete = true;
+
 
         });
     }
@@ -200,9 +199,55 @@ public class SimulationController implements ISimulatorUI {
     // Button Handlers
     @FXML
     private void handlePause() {
-        // Pause functionality (would need to be implemented in Engine)
-        showInfo("Pause", "Pause functionality coming soon!");
+        if (controller == null || controller.getEngine() == null) return;
+
+        if (pauseButton.getText().equals("Pause")) {
+            controller.getEngine().pause();
+            pauseButton.setText("Resume");
+            pauseButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;");
+            simulationStatusLabel.setText("Paused");
+        } else {
+            controller.getEngine().resume();
+            pauseButton.setText("Pause");
+            pauseButton.setStyle("-fx-background-color: #F39C12; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;");
+            simulationStatusLabel.setText("Running...");
+        }
+
     }
+    @FXML
+    private void handleStop() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Stop Simulation");
+        confirm.setHeaderText("Are you sure you want to stop the simulation?");
+        confirm.setContentText("The simulation will be terminated.");
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                if (controller != null && controller.getEngine() != null) {
+                    controller.getEngine().stopSimulation();
+                    userStopped = true;
+
+                    Platform.runLater(() -> {
+                        simulationStatusLabel.setText("Stopped");
+                        pauseButton.setDisable(true);
+                        speedUpButton.setDisable(true);
+                        slowDownButton.setDisable(true);
+                        stopButton.setDisable(true);
+
+                        // Show alert and return home
+                        Alert stopped = new Alert(Alert.AlertType.INFORMATION);
+                        stopped.setTitle("Simulation Stopped");
+                        stopped.setContentText("Simulation has been stopped successfully.");
+                        stopped.showAndWait();
+
+                        // Return to home
+                        navigateToHome();
+                    });
+                }
+            }
+        });
+    }
+
 
     @FXML
     private void handleSpeedUp() {
@@ -222,54 +267,47 @@ public class SimulationController implements ISimulatorUI {
         }
     }
 
-
-
-    @FXML
-    private void handleStop() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Stop Simulation");
-        confirm.setHeaderText("Are you sure you want to stop the simulation?");
-        confirm.setContentText("The simulation will be terminated and results may be incomplete.");
-
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                userStopped = true;  // Set flag
-                handleReturnToWelcome();
-            }
-        });
-    }
-
-
-    @FXML
-    private void handleReturnToWelcome() {
+    // Call the welcomeView controller
+    private void navigateToHome() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/welcome.fxml"));
-            Scene scene = new Scene(loader.load(),1600,900);
-
             Stage stage = (Stage) stopButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setTitle("Visa Application Simulator");
-
-        } catch (Exception e) {
-            showError("Navigation Error", "Failed to return to welcome page: " + e.getMessage());
-        }
-    }
-    public void handleGoToResult() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/results.fxml"));
-            Scene scene = new Scene(loader.load(),1600,900);
-
-            Stage stage = (Stage) stopButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setTitle("Visa Application Simulator");
-
+            HomeView.show(stage);
         } catch (Exception e) {
             showError("Navigation Error", "Failed to return to welcome page: " + e.getMessage());
         }
     }
 
+    // This is the menu handler that checks if simulation is running
+    @FXML
+    private void navigateToMain() {
+        if (simulationRunning && !simulationComplete) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Simulation Running");
+            alert.setHeaderText("Cannot leave page");
+            alert.setContentText("Simulation is currently running. Please stop or wait for completion before navigating away.");
+            alert.showAndWait();
+            return;
+        }
+        navigateToHome();
+    }
+
+    public void navigateToResult() {
+        if (simulationRunning && !simulationComplete){
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Simulation Running");
+            alert.setHeaderText("Cannot leave page");
+            alert.setContentText("Simulation is currently running. Please stop or wait for completion before navigating away.");
+            alert.showAndWait();
+            return;
+        }
+
+        try {
+            Stage stage = (Stage) stopButton.getScene().getWindow();
+            ResultView.show(stage);
+        } catch (Exception e) {
+            showError("Navigation Error", "Failed to navigate: " + e.getMessage());
+        }
+    }
 
     private void showError(String title, String message) {
         Platform.runLater(() -> {

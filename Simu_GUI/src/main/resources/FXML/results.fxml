@@ -1,38 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controller.ResultsController"
-            prefHeight="900.0" prefWidth="1600.0"
-            style="-fx-background-color: #ECF0F1;">
+<BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #ECF0F1;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ResultsController">
 
     <!-- Top: Menu Bar & Title -->
     <top>
         <VBox>
             <MenuBar>
                 <Menu text="File">
-                    <MenuItem text="Export to PDF" onAction="#handleExportPDF"/>
-                    <MenuItem text="Export to CSV" onAction="#handleExportCSV"/>
-                    <SeparatorMenuItem/>
-                    <MenuItem text="New Simulation" onAction="#handleNewSimulation"/>
-                </Menu>
-                <Menu text="View">
-                    <MenuItem text="Compare Runs" onAction="#handleCompare"/>
-                    <MenuItem text="View All Runs" onAction="#handleViewAll"/>
+                    <SeparatorMenuItem />
+                    <MenuItem onAction="#navigateToHome" text="Return Home" />
                 </Menu>
                 <Menu text="Help">
-                    <MenuItem text="About" onAction="#handleAbout"/>
+                    <MenuItem onAction="#handleAbout" text="About" />
                 </Menu>
             </MenuBar>
 
             <!-- Title Bar -->
-            <HBox alignment="CENTER" spacing="10"
-                  style="-fx-background-color: #2C3E50; -fx-padding: 15;">
-                <Label text="📊 SIMULATION RESULTS"
-                       style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <HBox alignment="CENTER" spacing="10" style="-fx-background-color: #2C3E50; -fx-padding: 15;">
+                <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="📊 SIMULATION RESULTS" />
             </HBox>
         </VBox>
     </top>
@@ -43,17 +48,14 @@
 
             <!-- Left: Simulation Runs List -->
             <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: white;">
-                <Label text="Recent Simulations"
-                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;"/>
-                <Separator/>
+                <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Recent Simulations" />
+                <Separator />
 
-                <ListView fx:id="runsListView" VBox.vgrow="ALWAYS"/>
+                <ListView fx:id="runsListView" VBox.vgrow="ALWAYS" />
 
                 <HBox spacing="10">
-                    <Button text="Load" onAction="#handleLoadRun" prefWidth="100"
-                            style="-fx-background-color: #3498DB; -fx-text-fill: white;"/>
-                    <Button text="Delete" onAction="#handleDeleteRun" prefWidth="100"
-                            style="-fx-background-color: #E74C3C; -fx-text-fill: white;"/>
+                    <Button onAction="#handleLoadRun" prefWidth="100" style="-fx-background-color: #3498DB; -fx-text-fill: white;" text="Load" />
+                    <Button onAction="#handleDeleteRun" prefWidth="100" style="-fx-background-color: #E74C3C; -fx-text-fill: white;" text="Delete" />
                 </HBox>
             </VBox>
 
@@ -63,129 +65,105 @@
 
                     <!-- Run Header Info -->
                     <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 5;">
-                        <Label fx:id="runHeaderLabel" text="Simulation Run #XX"
-                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;"/>
-                        <Label fx:id="runTimestampLabel" text="Date &amp; Time"
-                               style="-fx-font-size: 14px; -fx-text-fill: #7F8C8D;"/>
-                        <Separator/>
+                        <Label fx:id="runHeaderLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Simulation Run #XX" />
+                        <Label fx:id="runTimestampLabel" style="-fx-font-size: 14px; -fx-text-fill: #7F8C8D;" text="Date &amp; Time" />
+                        <Separator />
                     </VBox>
 
                     <!-- Summary Statistics -->
                     <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 5;">
-                        <Label text="📈 Summary Statistics"
-                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;"/>
-                        <Separator/>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📈 Summary Statistics" />
+                        <Separator />
 
                         <GridPane hgap="30" vgap="20">
                             <columnConstraints>
-                                <ColumnConstraints minWidth="250"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints minWidth="250" />
+                                <ColumnConstraints minWidth="250" />
                             </columnConstraints>
 
                             <HBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <Label text="Total Applications:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="totalAppsResultLabel" text="0"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #3498DB;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Total Applications:" />
+                                <Label fx:id="totalAppsResultLabel" style="-fx-font-size: 14px; -fx-text-fill: #3498DB;" text="0" />
                             </HBox>
 
                             <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                <Label text="Average System Time:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="avgSystemTimeResultLabel" text="0.00 min"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #3498DB;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Average System Time:" />
+                                <Label fx:id="avgSystemTimeResultLabel" style="-fx-font-size: 14px; -fx-text-fill: #3498DB;" text="0.00 min" />
                             </HBox>
 
                             <HBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                                <Label text="Approved:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="approvedResultLabel" text="0 (0%)"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #27AE60;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Approved:" />
+                                <Label fx:id="approvedResultLabel" style="-fx-font-size: 14px; -fx-text-fill: #27AE60;" text="0 (0%)" />
                             </HBox>
 
                             <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                <Label text="Rejected:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="rejectedResultLabel" text="0 (0%)"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Rejected:" />
+                                <Label fx:id="rejectedResultLabel" style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;" text="0 (0%)" />
                             </HBox>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
                         </GridPane>
                     </VBox>
 
                     <!-- Service Point Performance Table -->
                     <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 5;">
-                        <Label text="🏢 Service Point Performance"
-                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;"/>
-                        <Separator/>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="🏢 Service Point Performance" />
+                        <Separator />
 
                         <TableView fx:id="servicePointTable" prefHeight="300">
                             <columns>
-                                <TableColumn fx:id="spNameColumn" text="Service Point" prefWidth="250"/>
-                                <TableColumn fx:id="departuresColumn" text="Departures" prefWidth="100"/>
-                                <TableColumn fx:id="avgWaitColumn" text="Avg Wait (min)" prefWidth="120"/>
-                                <TableColumn fx:id="maxQueueColumn" text="Max Queue" prefWidth="100"/>
-                                <TableColumn fx:id="utilizationColumn" text="Utilization" prefWidth="100"/>
-                                <TableColumn fx:id="employeesColumn" text="Employees" prefWidth="100"/>
-                                <TableColumn fx:id="bottleneckColumn" text="Status" prefWidth="100"/>
+                                <TableColumn fx:id="spNameColumn" prefWidth="240.0" text="Service Point" />
+                                <TableColumn fx:id="departuresColumn" prefWidth="110.0" text="Departures" />
+                                <TableColumn fx:id="avgWaitColumn" prefWidth="120" text="Avg Wait (min)" />
+                                <TableColumn fx:id="maxQueueColumn" prefWidth="100" text="Max Queue" />
+                                <TableColumn fx:id="utilizationColumn" prefWidth="100" text="Utilization" />
+                                <TableColumn fx:id="employeesColumn" prefWidth="100" text="Employees" />
+                                <TableColumn fx:id="bottleneckColumn" prefWidth="100" text="Status" />
                             </columns>
                         </TableView>
                     </VBox>
 
                     <!-- Bottleneck Analysis -->
-                    <VBox fx:id="bottleneckPanel" spacing="10"
-                          style="-fx-background-color: #FFEBEE; -fx-padding: 20; -fx-background-radius: 5; -fx-border-color: #E74C3C; -fx-border-width: 2; -fx-border-radius: 5;">
-                        <Label text="⚠️ Bottleneck Detected"
-                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #E74C3C;"/>
-                        <Separator/>
+                    <VBox fx:id="bottleneckPanel" spacing="10" style="-fx-background-color: #FFEBEE; -fx-padding: 20; -fx-background-radius: 5; -fx-border-color: #E74C3C; -fx-border-width: 2; -fx-border-radius: 5;">
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #E74C3C;" text="⚠️ Bottleneck Detected" />
+                        <Separator />
 
                         <VBox spacing="8">
                             <HBox spacing="10">
-                                <Label text="Critical Service Point:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="bottleneckNameLabel" text="N/A"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #E74C3C; -fx-font-weight: bold;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Critical Service Point:" />
+                                <Label fx:id="bottleneckNameLabel" style="-fx-font-size: 14px; -fx-text-fill: #E74C3C; -fx-font-weight: bold;" text="N/A" />
                             </HBox>
 
                             <HBox spacing="10">
-                                <Label text="Utilization:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="bottleneckUtilLabel" text="0%"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Utilization:" />
+                                <Label fx:id="bottleneckUtilLabel" style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;" text="0%" />
                             </HBox>
 
                             <HBox spacing="10">
-                                <Label text="Max Queue Length:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="bottleneckQueueLabel" text="0"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Max Queue Length:" />
+                                <Label fx:id="bottleneckQueueLabel" style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;" text="0" />
                             </HBox>
 
                             <HBox spacing="10">
-                                <Label text="Average Wait Time:"
-                                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                                <Label fx:id="bottleneckWaitLabel" text="0.00 min"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;"/>
+                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Average Wait Time:" />
+                                <Label fx:id="bottleneckWaitLabel" style="-fx-font-size: 14px; -fx-text-fill: #E74C3C;" text="0.00 min" />
                             </HBox>
 
-                            <Separator/>
+                            <Separator />
 
-                            <Label text="💡 Recommendation:"
-                                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;"/>
-                            <Label fx:id="recommendationLabel" wrapText="true"
-                                   text="Consider adding more employees to this service point to reduce wait times and improve overall throughput."
-                                   style="-fx-font-size: 13px; -fx-text-fill: #34495E;"/>
+                            <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="💡 Recommendation:" />
+                            <Label fx:id="recommendationLabel" style="-fx-font-size: 13px; -fx-text-fill: #34495E;" text="Consider adding more employees to this service point to reduce wait times and improve overall throughput." wrapText="true" />
                         </VBox>
                     </VBox>
 
                     <!-- Text Results (Raw Output) -->
                     <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 5;">
-                        <Label text="📝 Detailed Results"
-                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;"/>
-                        <Separator/>
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="📝 Detailed Results" />
+                        <Separator />
 
-                        <TextArea fx:id="detailedResultsTextArea" prefHeight="300" editable="false"
-                                  wrapText="true"
-                                  style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;"/>
+                        <TextArea fx:id="detailedResultsTextArea" editable="false" prefHeight="300" style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;" wrapText="true" />
                     </VBox>
                 </VBox>
             </ScrollPane>
@@ -194,20 +172,8 @@
 
     <!-- Bottom: Action Buttons -->
     <bottom>
-        <HBox alignment="CENTER" spacing="20"
-              style="-fx-background-color: #2C3E50; -fx-padding: 20;">
-            <Button text="New Simulation" onAction="#handleNewSimulation"
-                    prefWidth="180" prefHeight="40"
-                    style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
-            <Button text="Export PDF" onAction="#handleExportPDF"
-                    prefWidth="180" prefHeight="40"
-                    style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
-            <Button text="Export CSV" onAction="#handleExportCSV"
-                    prefWidth="180" prefHeight="40"
-                    style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
-            <Button text="Compare Runs" onAction="#handleCompare"
-                    prefWidth="180" prefHeight="40"
-                    style="-fx-background-color: #9B59B6; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+        <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #2C3E50; -fx-padding: 20;">
+            <Button onAction="#navigateToHome" prefHeight="40" prefWidth="180" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Return Home" />
         </HBox>
     </bottom>
 
