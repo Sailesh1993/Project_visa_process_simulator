@@ -17,8 +17,6 @@ public class SimulationRun {
     @Column(name = "Timestamp")
     private LocalDateTime timestamp;
 
-    private String runName; // NEW
-
     @Column(name = "Total_Applications")
     private int totalApplications;
 
@@ -40,19 +38,19 @@ public class SimulationRun {
     @OneToMany(mappedBy = "simulationRun")
     private List<SPResult> servicePointResults = new ArrayList<>();
 
-    @OneToMany(mappedBy = "simulationRun")
+    @OneToMany(mappedBy = "simulationRun", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicationLog> applicationLogs = new ArrayList<>();
 
     public SimulationRun() {this.timestamp = LocalDateTime.now();}
+
+    @PrePersist
+    @PreUpdate
+    private void roundValues() {avgSystemTime = Math.round(avgSystemTime * 100.0) / 100.0;}
 
     //getters
     public Long getId() {return id;}
 
     public LocalDateTime getTimestamp() {return timestamp;}
-
-    public String getRunName() { return runName; }
-
-    public void setRunName(String runName) { this.runName = runName; }
 
     public int getTotalApplications() {return totalApplications;}
 
