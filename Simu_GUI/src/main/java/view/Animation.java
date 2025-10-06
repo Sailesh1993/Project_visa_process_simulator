@@ -8,14 +8,13 @@ import javafx.scene.text.Font;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Visualisation2 extends Canvas implements IVisualisation {
+public class Animation extends Canvas implements IVisualisation {
     private GraphicsContext gc;
     private int customerCount = 0;
     private int[] queueSizes = new int[6];
     private boolean[] servicePointBusy = new boolean[6];
     private List<AnimatedCustomer> customers = new ArrayList<>();
     private AnimationTimer timer;
-
     // Service point positions (horizontal layout)
     private static final int[][] SP_POSITIONS = {
             {200, 200},   // SP1
@@ -36,7 +35,7 @@ public class Visualisation2 extends Canvas implements IVisualisation {
             {1120, 200}   // Queue for SP6
     };
 
-    public Visualisation2(int width, int height) {
+    public Animation(int width, int height) {
         super(width, height);
         gc = this.getGraphicsContext2D();
         startAnimation();

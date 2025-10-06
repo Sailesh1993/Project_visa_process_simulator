@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import view.ISimulatorUI;
 import view.IVisualisation;
-import view.Visualisation2;
+import view.Animation;
 public class SimulationController implements ISimulatorUI {
 
     // Top controls
@@ -80,7 +80,7 @@ public class SimulationController implements ISimulatorUI {
     }
 
     private void setupVisualization() {
-        visualisation = new Visualisation2(1400, 550);
+        visualisation = new Animation(1400, 550);
 
         // Get the actual canvas from Visualisation2
         Canvas visCanvas = (Canvas) visualisation;

@@ -333,7 +333,6 @@ public class WelcomeController {
         }
     }
 
-
     @FXML
     private void handleLoadRun() {
         SimulationRun selectedRun = recentRunsTable.getSelectionModel().getSelectedItem();
