@@ -38,7 +38,13 @@ public class SPResult {
         this.bottleneck = bottleneck;
     }
 
-    public SPResult() {
+    public SPResult() {}
+
+    @PrePersist
+    @PreUpdate
+    private void roundValues() {
+        avgWaitingTime = Math.round(avgWaitingTime * 100.0) / 100.0;
+        utilization = Math.round(utilization * 100.0) / 100.0;
     }
 
     public Long getId() {

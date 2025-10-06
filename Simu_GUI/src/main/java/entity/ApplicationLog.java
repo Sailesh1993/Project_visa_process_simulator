@@ -36,15 +36,22 @@ public class ApplicationLog {
     @JoinColumn(name = "run_id", nullable = false)
     private SimulationRun simulationRun;
 
-    public ApplicationLog() {}
-
     public ApplicationLog(int appId, double arrivalTime, double removalTime, boolean approved, double waitingTime) {
-        this();
         this.appId = appId;
         this.arrivalTime = arrivalTime;
         this.removalTime = removalTime;
         this.approved = approved;
         this.waitingTime = waitingTime;
+    }
+
+    public ApplicationLog() {}
+
+    @PrePersist
+    @PreUpdate
+    private void roundValues() {
+        arrivalTime = Math.round(arrivalTime * 100.0) / 100.0;
+        removalTime = Math.round(removalTime * 100.0) / 100.0;
+        waitingTime = Math.round(waitingTime * 100.0) / 100.0;
     }
 
     public Long getId() {return id;}
