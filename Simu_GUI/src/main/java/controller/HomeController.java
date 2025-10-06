@@ -6,18 +6,18 @@ import entity.SimulationRun;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import view.ResultView;
+import view.SimulationView;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-public class WelcomeController {
+public class HomeController {
 
     // Basic Parameters
     @FXML private TextField simulationTimeField;
@@ -77,9 +77,6 @@ public class WelcomeController {
 
     // Buttons
     @FXML private Button startButton;
-//    @FXML private Button loadRunButton;
-//    @FXML private Button deleteRunButton;
-//    @FXML private Accordion distributionAccordion;
 
     private SimulationRunDao dao = new SimulationRunDao();
 
@@ -316,17 +313,8 @@ public class WelcomeController {
 
     private void navigateToSimulation(double simTime, long delay, Long seed, DistributionConfig[] configs) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/simulation.fxml"));
-            Scene scene = new Scene(loader.load());
-
-            SimulationController simController = loader.getController();
-            simController.initialize(simTime, delay, seed, configs);
-
             Stage stage = (Stage) startButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setTitle("Simulation Running");
-
+            SimulationView.show(stage, simTime, delay, seed, configs);
         } catch (Exception e) {
             showError("Navigation Error", "Failed to load simulation page: " + e.getMessage());
             e.printStackTrace();
@@ -369,17 +357,15 @@ public class WelcomeController {
         }
     }
 
+
     private void navigateToResults(Long runId) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/results.fxml"));
-            Scene scene = new Scene(loader.load(), 1600, 900);
+            Stage stage = (Stage) startButton.getScene().getWindow();
 
-            ResultsController resultsController = loader.getController();
+            // Load results view and get controller
+            ResultsController resultsController = ResultView.show(stage);
             resultsController.loadSimulationRun(runId);
 
-            Stage stage = (Stage) startButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
             stage.setTitle("Simulation Results");
 
         } catch (Exception e) {

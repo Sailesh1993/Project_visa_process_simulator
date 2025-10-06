@@ -5,12 +5,11 @@ import entity.SPResult;
 import entity.SimulationRun;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import view.HomeView;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -237,14 +236,13 @@ public class ResultsController {
         });
     }
 
+
+
     @FXML
-    private void handleNewSimulation() {
+    private void navigateToHome() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/welcome.fxml"));
-            Scene scene = new Scene(loader.load(), 1600, 900);
             Stage stage = (Stage) servicePointTable.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Visa Application Simulator");
+            HomeView.show(stage);
         } catch (Exception e) {
             showError("Navigation Error", e.getMessage());
         }

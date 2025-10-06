@@ -26,9 +26,9 @@
                 <Menu text="File">
                     <MenuItem onAction="#handleStop" text="Stop Simulation" />
                     <SeparatorMenuItem />
-                    <MenuItem onAction="#handleReturnToHome" text="Return to Home" />
+                    <MenuItem onAction="#navigateToMain" text="Return to Home" />
                     <SeparatorMenuItem />
-                    <MenuItem onAction="#handleGoToResult" text="Go to result" />
+                    <MenuItem onAction="#navigateToResult" text="Go to result" />
                 </Menu>
             </MenuBar>
 

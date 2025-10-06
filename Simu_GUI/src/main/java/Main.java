@@ -1,8 +1,8 @@
 import javafx.application.Application;
-import view.WelcomeView;
+import view.HomeView;
 
 public class Main {
     public static void main(String[] args) {
-        Application.launch(WelcomeView.class, args);
+        Application.launch(HomeView.class, args);
     }
 }

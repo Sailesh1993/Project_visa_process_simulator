@@ -28,7 +28,7 @@
             <MenuBar>
                 <Menu text="File">
                     <SeparatorMenuItem />
-                    <MenuItem onAction="#handleNewSimulation" text="Return Home" />
+                    <MenuItem onAction="#navigateToHome" text="Return Home" />
                 </Menu>
                 <Menu text="Help">
                     <MenuItem onAction="#handleAbout" text="About" />
@@ -173,7 +173,7 @@
     <!-- Bottom: Action Buttons -->
     <bottom>
         <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #2C3E50; -fx-padding: 20;">
-            <Button onAction="#handleNewSimulation" prefHeight="40" prefWidth="180" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Return Home" />
+            <Button onAction="#navigateToHome" prefHeight="40" prefWidth="180" style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Return Home" />
         </HBox>
     </bottom>
 

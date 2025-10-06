@@ -3,16 +3,13 @@ package controller;
 import distributionconfiguration.DistributionConfig;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import view.ISimulatorUI;
-import view.IVisualisation;
-import view.Animation;
+import view.*;
+
 public class SimulationController implements ISimulatorUI {
 
     // Top controls
@@ -244,7 +241,7 @@ public class SimulationController implements ISimulatorUI {
                         stopped.showAndWait();
 
                         // Return to home
-                        navigateToWelcome();
+                        navigateToHome();
                     });
                 }
             }
@@ -270,10 +267,19 @@ public class SimulationController implements ISimulatorUI {
         }
     }
 
+    // Call the welcomeView controller
+    private void navigateToHome() {
+        try {
+            Stage stage = (Stage) stopButton.getScene().getWindow();
+            HomeView.show(stage);
+        } catch (Exception e) {
+            showError("Navigation Error", "Failed to return to welcome page: " + e.getMessage());
+        }
+    }
 
     // This is the menu handler that checks if simulation is running
     @FXML
-    private void handleReturnToHome() {
+    private void navigateToMain() {
         if (simulationRunning && !simulationComplete) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Simulation Running");
@@ -282,24 +288,10 @@ public class SimulationController implements ISimulatorUI {
             alert.showAndWait();
             return;
         }
-        navigateToWelcome();
+        navigateToHome();
     }
 
-    // This is the internal navigation method (called after stop confirmation)
-    private void navigateToWelcome() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/welcome.fxml"));
-            Scene scene = new Scene(loader.load(), 1600, 900);
-            Stage stage = (Stage) stopButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setTitle("Visa Application Simulator");
-        } catch (Exception e) {
-            showError("Navigation Error", "Failed to return to welcome page: " + e.getMessage());
-        }
-    }
-
-    public void handleGoToResult() {
+    public void navigateToResult() {
         if (simulationRunning && !simulationComplete){
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Simulation Running");
@@ -310,16 +302,12 @@ public class SimulationController implements ISimulatorUI {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/results.fxml"));
-            Scene scene = new Scene(loader.load(), 1600, 900);
             Stage stage = (Stage) stopButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
+            ResultView.show(stage);
         } catch (Exception e) {
             showError("Navigation Error", "Failed to navigate: " + e.getMessage());
         }
     }
-
 
     private void showError(String title, String message) {
         Platform.runLater(() -> {
