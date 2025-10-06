@@ -119,7 +119,6 @@
                         <Canvas fx:id="visualizationCanvas" height="550" width="1400" />
                     </StackPane>
                 </VBox>
-
                 <!-- Hidden Queue Status Container (kept for code compatibility) -->
                 <VBox fx:id="queueStatusContainer" managed="false" spacing="10" visible="false" />
 

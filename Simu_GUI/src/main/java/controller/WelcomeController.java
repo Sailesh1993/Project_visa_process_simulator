@@ -87,6 +87,7 @@ public class WelcomeController {
     private void initialize() {
         setupDistributionComboBoxes();
         setupDistributionListeners();
+        updateParameterFields("Normal", arrival_param2, arrival_param2Label); // set default
         loadRecentRuns();
         setupTableColumns();
     }
@@ -95,25 +96,25 @@ public class WelcomeController {
         ObservableList<String> distTypes = FXCollections.observableArrayList("Normal", "Negexp", "Gamma");
 
         arrival_distType.setItems(distTypes);
-        arrival_distType.setValue("Negexp"); // Set default value
+        arrival_distType.setValue("Normal"); // Set default value
 
         sp1_distType.setItems(distTypes);
-        sp1_distType.setValue("Normal");
+        sp1_distType.setValue("Negexp");
 
         sp2_distType.setItems(distTypes);
-        sp2_distType.setValue("Normal");
+        sp2_distType.setValue("Negexp");
 
         sp3_distType.setItems(distTypes);
         sp3_distType.setValue("Normal");
 
         sp4_distType.setItems(distTypes);
-        sp4_distType.setValue("Normal");
+        sp4_distType.setValue("Negexp");
 
         sp5_distType.setItems(distTypes);
-        sp5_distType.setValue("Normal");
+        sp5_distType.setValue("Gamma");
 
         sp6_distType.setItems(distTypes);
-        sp6_distType.setValue("Normal");
+        sp6_distType.setValue("Gamma");
     }
 
     private void setupDistributionListeners() {
