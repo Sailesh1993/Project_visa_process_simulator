@@ -148,6 +148,7 @@ public class ApplicationAsCustomer {
         Trace.out(Trace.Level.INFO, "Application #" + id + " removed at " + Trace.formatTime(removalTime));
         Trace.out(Trace.Level.INFO, "Total time in system: " + id + " " + Trace.formatTime((removalTime - arrivalTime)));
         Trace.out(Trace.Level.INFO, "Application waited " + Trace.formatTime(getTimeInWaitingRoom()) + " minutes in queue.");
+        System.out.println("Creating app #" + id + " | total in memory now: " + allApplications.size());
 
         if (requiresBiometrics) {
             Trace.out(Trace.Level.INFO, "Time spent in biometrics: " + Trace.formatTime(getTimeInBiometrics()) + " minutes");

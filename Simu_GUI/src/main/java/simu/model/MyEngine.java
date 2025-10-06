@@ -1,7 +1,6 @@
 package simu.model;
 
 import controller.IControllerMtoV;
-
 import dao.SimulationRunDao;
 import distributionconfiguration.DistributionConfig;
 import entity.*;
@@ -17,12 +16,9 @@ public class MyEngine extends Engine {
     private ServicePoint[] servicePoints;
     private Random randomGenerator;
     private IControllerMtoV controller;
-
     private DistributionConfig[] userConfigs;
 
-    private List<ApplicationLog> applicationLogs = new ArrayList<>();
-
-    //counters
+    // Counters
     private int totalApplications = 0;
     private int approvedCount = 0;
     private int rejectedCount = 0;
@@ -31,47 +27,50 @@ public class MyEngine extends Engine {
     private int exitedApprovedCount = 0;
     private int exitedRejectedCount = 0;
 
-    public MyEngine(IControllerMtoV controller, DistributionConfig[] configs, Long seed) { // NEW
-        super(controller); // NEW (Pass controller to Engine)
-        Clock.getInstance().reset(); // for new simulation
+    public MyEngine(IControllerMtoV controller, DistributionConfig[] configs, Long seed) {
+        super(controller);
+        Clock.getInstance().reset();
         this.controller = controller;
         this.userConfigs = configs;
+
         servicePoints = new ServicePoint[6];
-        randomGenerator = (seed != null) ? new Random(seed) : new Random(System.currentTimeMillis()); // To make runs repeatable
+        randomGenerator = (seed != null) ? new Random(seed) : new Random(System.currentTimeMillis());
 
-        servicePoints[0] = new ServicePoint(configs[0].buildGenerator(), eventList, EventType.END_APPLICATION_ENTRY, controller); // SP1
-        servicePoints[1] = new ServicePoint(configs[1].buildGenerator(), eventList, EventType.END_DOC_SUBMISSION, controller);    // SP2
-        servicePoints[2] = new ServicePoint(configs[2].buildGenerator(), eventList, EventType.END_BIOMETRICS, controller);        // SP3: Biometrics
-        servicePoints[3] = new ServicePoint(configs[3].buildGenerator(), eventList, EventType.MISSING_DOCS_RESOLVED, controller);   // SP4: Missing Docs
-        servicePoints[4] = new ServicePoint(configs[4].buildGenerator(), eventList, EventType.END_DOC_CHECK, controller);         // SP5
-        servicePoints[5] = new ServicePoint(configs[5].buildGenerator(), eventList, EventType.END_DECISION, controller);          // SP6
+        // Initialize service points
+        servicePoints[0] = new ServicePoint(configs[0].buildGenerator(), eventList, EventType.END_APPLICATION_ENTRY, controller);
+        servicePoints[1] = new ServicePoint(configs[1].buildGenerator(), eventList, EventType.END_DOC_SUBMISSION, controller);
+        servicePoints[2] = new ServicePoint(configs[2].buildGenerator(), eventList, EventType.END_BIOMETRICS, controller);
+        servicePoints[3] = new ServicePoint(configs[3].buildGenerator(), eventList, EventType.MISSING_DOCS_RESOLVED, controller);
+        servicePoints[4] = new ServicePoint(configs[4].buildGenerator(), eventList, EventType.END_DOC_CHECK, controller);
+        servicePoints[5] = new ServicePoint(configs[5].buildGenerator(), eventList, EventType.END_DECISION, controller);
 
-        // Initialize Arrival Process
+        // Arrival process
         arrivalProcess = new ArrivalProcess(configs[6].buildGenerator(), eventList, EventType.ARRIVAL);
     }
 
     @Override
     protected void initialization() {
-        ApplicationAsCustomer.resetIdCounter();
+       /* if (ApplicationAsCustomer.getAllApplications().isEmpty()) {
+            ApplicationAsCustomer.resetIdCounter();
+        }*/
         arrivalProcess.generateNext();
     }
 
+
     @Override
-    protected void runEvent(Event t) {  // B phase events
+    protected void runEvent(Event t) {
         ApplicationAsCustomer application;
-
         switch ((EventType) t.getType()) {
-            case ARRIVAL:
-                boolean isNew = randomGenerator.nextDouble() < 0.65;      //65% chance of being a new application
-                boolean docsComplete = randomGenerator.nextDouble() < 0.8; //80% chance of having all documents complete
-                servicePoints[0].addQueue(new ApplicationAsCustomer(isNew, docsComplete)); // Add to Application Entry & Appointment Booking
-                controller.updateQueueStatus(0, servicePoints[0].getQueueSize());       // Queue update
-
-                controller.visualiseCustomer();         // Notifying controller to visualize customer arrival
-                arrivalProcess.generateNext();          // Schedule next arrival
-                break;
-
-            case END_APPLICATION_ENTRY: // Application Entry done, move to Document Submission & Interview
+            case ARRIVAL -> {
+                boolean isNew = randomGenerator.nextDouble() < 0.65;
+                boolean docsComplete = randomGenerator.nextDouble() < 0.8;
+                ApplicationAsCustomer app = new ApplicationAsCustomer(isNew, docsComplete);
+                servicePoints[0].addQueue(app);
+                controller.updateQueueStatus(0, servicePoints[0].getQueueSize());
+                controller.visualiseCustomer();
+                arrivalProcess.generateNext();
+            }
+            case END_APPLICATION_ENTRY -> {
                 application = servicePoints[0].removeQueue();
                 if (application != null) {
                     application.setCurrentStage(EventType.END_DOC_SUBMISSION);
@@ -79,146 +78,99 @@ public class MyEngine extends Engine {
                     servicePoints[1].addQueue(application);
                 }
                 controller.updateQueueStatus(0, servicePoints[0].getQueueSize());
-                break;
-
-            case END_DOC_SUBMISSION: // Document Submission done, route conditionally
+            }
+            case END_DOC_SUBMISSION -> {
                 application = servicePoints[1].removeQueue();
                 if (application != null) {
                     if (application.requiresBiometrics()) {
                         controller.getVisualisation().moveCustomer(1, 2, false);
-                        servicePoints[2].addQueue(application);         // Biometrics
+                        servicePoints[2].addQueue(application);
                     } else if (!application.isDocsComplete()) {
                         controller.getVisualisation().moveCustomer(1, 3, false);
-                        servicePoints[3].addQueue(application);         // Missing Docs
+                        servicePoints[3].addQueue(application);
                     } else {
                         controller.getVisualisation().moveCustomer(1, 4, false);
-                        servicePoints[4].addQueue(application);         // Doc Verification & Background Check
+                        servicePoints[4].addQueue(application);
                     }
                 }
                 controller.updateQueueStatus(1, servicePoints[1].getQueueSize());
-                break;
-
-            case END_BIOMETRICS:
+            }
+            case END_BIOMETRICS -> {
                 application = servicePoints[2].removeQueue();
                 if (application != null) {
                     controller.getVisualisation().moveCustomer(2, 4, false);
-
-                    if (application.requiresBiometrics()) {
-                        double timeInBiometrics = Clock.getInstance().getTime() - application.getTimeEnteredQueue();
-                        application.setTimeInBiometrics(timeInBiometrics);
-                    }
-                    servicePoints[4].addQueue(application); // move to Doc Verification
+                    double timeInBiometrics = Clock.getInstance().getTime() - application.getTimeEnteredQueue();
+                    application.setTimeInBiometrics(timeInBiometrics);
+                    servicePoints[4].addQueue(application);
                 }
                 controller.updateQueueStatus(2, servicePoints[2].getQueueSize());
-                break;
-
-            case MISSING_DOCS_RESOLVED:
+            }
+            case MISSING_DOCS_RESOLVED -> {
                 application = servicePoints[3].removeQueue();
                 if (application != null) {
-                    controller.getVisualisation().moveCustomer(3, 4, false);  // Add animation
+                    controller.getVisualisation().moveCustomer(3, 4, false);
                     servicePoints[4].addQueue(application);
                 }
                 controller.updateQueueStatus(3, servicePoints[3].getQueueSize());
-                break;
-
-            case END_DOC_CHECK:
+            }
+            case END_DOC_CHECK -> {
                 application = servicePoints[4].removeQueue();
                 if (application != null) {
-                    controller.getVisualisation().moveCustomer(4, 5, false);  // Add animation
-                    servicePoints[5].addQueue(application); // move to Decision Room
+                    controller.getVisualisation().moveCustomer(4, 5, false);
+                    servicePoints[5].addQueue(application);
                 }
                 controller.updateQueueStatus(4, servicePoints[4].getQueueSize());
-                break;
-
-            case END_DECISION:
+            }
+            case END_DECISION -> {
                 application = servicePoints[5].removeQueue();
-                if (application == null) break; // defensive
+                if (application == null) break;
 
                 application.setRemovalTime(Clock.getInstance().getTime());
-
                 boolean approved = randomGenerator.nextDouble() < 0.7;
                 application.setApproved(approved);
+                controller.getVisualisation().moveCustomer(5, -1, approved);
 
-                // Create application log entry for persistence
-            {
-                ApplicationLog log = new ApplicationLog(
-                        application.getId(),
-                        application.getArrivalTime(),
-                        application.getRemovalTime(),
-                        approved,
-                        application.getRemovalTime() - application.getArrivalTime()
-                );
-                log.setMessage(
-                        String.format("App %d | Arr: %.2f | Rem: %.2f | SysTime: %.2f | Approved: %s",
-                                application.getId(),
-                                application.getArrivalTime(),
-                                application.getRemovalTime(),
-                                application.getRemovalTime() - application.getArrivalTime(),
-                                approved)
-                );
-                log.setTimestamp(LocalDateTime.now());
-// simulationRun will be linked later in results()
-                applicationLogs.add(log);
-            }
+                // Increment counters
+                totalApplications++;
+                if (approved) approvedCount++;
+                else rejectedCount++;
 
-            // Animate customer leaving with approval status
-            controller.getVisualisation().moveCustomer(5, -1, approved);
+                totalSystemTime += application.getRemovalTime() - application.getArrivalTime();
 
-            totalApplications++;
-            if (approved) approvedCount++;
-            else rejectedCount++;
+                double avgTime = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
+                controller.updateStatistics(totalApplications, approvedCount, rejectedCount, avgTime, Clock.getInstance().getTime());
 
-            totalSystemTime += application.getRemovalTime() - application.getArrivalTime();
+                application.reportResults();
 
-            // Update UI with current statistics
-            double avgTime = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
-            controller.updateStatistics(totalApplications, approvedCount, rejectedCount, avgTime, Clock.getInstance().getTime());
-
-            // Schedule exit
-            EventType exitEvent = approved ? EventType.EXIT_APPROVED : EventType.EXIT_REJECTED;
-            eventList.add(new Event(exitEvent, Clock.getInstance().getTime()));
-
-            application.reportResults();
-
-            // Handle reapplication for rejected applications
-            if (!approved) {
-                application.markReapplication();
-                if (application.canReapply()) {
-                    servicePoints[0].addQueue(application);
+                // Handle reapplication
+                if (!approved) {
+                    application.markReapplication();
+                    if (application.canReapply()) servicePoints[0].addQueue(application);
+                    else eventList.add(new Event(EventType.EXIT_REJECTED, Clock.getInstance().getTime()));
                 } else {
-                    eventList.add(new Event(EventType.EXIT_REJECTED, Clock.getInstance().getTime()));
+                    eventList.add(new Event(EventType.EXIT_APPROVED, Clock.getInstance().getTime()));
                 }
+                controller.updateQueueStatus(5, servicePoints[5].getQueueSize());
             }
-
-            controller.updateQueueStatus(5, servicePoints[5].getQueueSize());
-            break;
-
-            case EXIT_APPROVED:
-                exitedApprovedCount++;
-                break;
-
-            case EXIT_REJECTED:
-                exitedRejectedCount++;
-                break;
+            case EXIT_APPROVED -> exitedApprovedCount++;
+            case EXIT_REJECTED -> exitedRejectedCount++;
         }
     }
 
     @Override
     protected void tryCEvents() {
-        for (ServicePoint servicePoint : servicePoints) {
-            if (!servicePoint.isReserved() && servicePoint.isOnQueue()) {
-                servicePoint.beginService();
-            }
-            servicePoint.checkBottleneck();
+        for (ServicePoint sp : servicePoints) {
+            if (!sp.isReserved() && sp.isOnQueue()) sp.beginService();
+            sp.checkBottleneck();
         }
     }
 
     @Override
     protected void results() {
-        // NEW GUI
+        // --- 1. Calculate average system time ---
         double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
 
-        // SimulationRun
+        // --- 2. Create SimulationRun ---
         SimulationRun run = new SimulationRun();
         run.setTimestamp(LocalDateTime.now());
         run.setTotalApplications(totalApplications);
@@ -227,7 +179,7 @@ public class MyEngine extends Engine {
         run.setAvgSystemTime(avgTimeInSystem);
         run.setConfigSaved(true);
 
-        // Find bottleneck service point
+        // --- 3. Find bottleneck service point ---
         ServicePoint bottleneck = null;
         double maxUtilization = 0.0;
         List<SPResult> spResults = new ArrayList<>();
@@ -239,7 +191,7 @@ public class MyEngine extends Engine {
             }
         }
 
-        // Create ServicePointResults with bottleneck info
+        // --- 4. Create ServicePointResults ---
         for (ServicePoint sp : servicePoints) {
             boolean isBottleneck = (sp == bottleneck);
             SPResult spr = new SPResult(
@@ -249,34 +201,30 @@ public class MyEngine extends Engine {
                     sp.getMaxQueueLength(),
                     sp.getUtilization(Clock.getInstance().getTime()),
                     sp.getNumEmployees(),
-                    isBottleneck // mark bottleneck
+                    isBottleneck
             );
+            spr.setSimulationRun(run);
             spResults.add(spr);
         }
 
-        // Create DistributionConfigs
+        // --- 5. Create DistributionConfigs ---
         List<DistConfig> configs = new ArrayList<>();
         for (int i = 0; i < servicePoints.length; i++) {
-            DistributionConfig ucfg = userConfigs[i]; // user-provided simulation config
+            DistributionConfig ucfg = userConfigs[i];
             DistConfig dc = new DistConfig();
-
             dc.setServicePointName(servicePoints[i].getServicePointName());
-
             dc.setDistributionType(ucfg.getType());
             dc.setParam1(ucfg.getParam1());
-            // param2 might be absent for negexp; support null
-            Double p2 = null;
             try {
-                p2 = ucfg.getParam2();
+                dc.setParam2(ucfg.getParam2());
             } catch (Exception ignored) {
+                dc.setParam2(null);
             }
-            dc.setParam2(p2);
-
             dc.setSimulationRun(run);
             configs.add(dc);
         }
 
-        // Arrival process config at index 6)
+        // Arrival process config at index 6
         DistributionConfig arrivalCfg = userConfigs[6];
         DistConfig arrivalDc = new DistConfig();
         arrivalDc.setServicePointName("Arrival Process");
@@ -290,81 +238,70 @@ public class MyEngine extends Engine {
         arrivalDc.setSimulationRun(run);
         configs.add(arrivalDc);
 
-        // Combine logs from simulation events and summary
-        List<ApplicationLog> logs = new ArrayList<>(applicationLogs);
-
-// Add per-application summary logs (optional)
+        // --- 6. Create ApplicationLogs from all customers across service points ---
+        // 4️⃣ Prepare ApplicationLog entities (new part)
+        List<ApplicationLog> logs = new ArrayList<>();
         for (ApplicationAsCustomer app : ApplicationAsCustomer.getAllApplications()) {
-            ApplicationLog log = new ApplicationLog();
-            log.setAppId(app.getId());
-            log.setArrivalTime(app.getArrivalTime());
-            log.setRemovalTime(app.getRemovalTime());
-            log.setApproved(app.isApproved());
-            log.setWaitingTime(app.getRemovalTime() - app.getArrivalTime());
-            log.setMessage("Application " + app.getId() + " completed. Approved: " + app.isApproved());
+             // only completed apps
+            ApplicationLog log = new ApplicationLog(
+                    app.getId(),
+                    app.getArrivalTime(),
+                    app.getRemovalTime(),
+                    app.isApproved(),
+                    app.getTimeInWaitingRoom()
+            );
+            log.setMessage("Application #" + app.getId() + " completed. Approved: " + app.isApproved());
             log.setTimestamp(LocalDateTime.now());
             log.setSimulationRun(run);
-
             logs.add(log);
-
-
         }
 
-// Link all logs to current simulation run
-        for (ApplicationLog log : logs) {
-            if (log.getSimulationRun() == null) {
-                log.setSimulationRun(run);
-            }
-        }
-
-// Persist everything
+        // --- 7. Persist everything atomically ---
         SimulationRunDao dao = new SimulationRunDao();
-        dao.persist(run, configs, spResults, logs);
+        dao.persistChildren(run, configs, spResults, logs);
 
-
-        // Prepare the result string
+        // --- 8. Build simulation results string ---
         StringBuilder resultStr = new StringBuilder();
         resultStr.append("\n*---------------------------------------------------------------------------------*");
         resultStr.append(String.format("\nSimulation ended at %.2f", Clock.getInstance().getTime()));
         resultStr.append("\n****** Simulation Results ******");
         resultStr.append(String.format("\n  -> Total applications processed: %d applications.", totalApplications));
         resultStr.append(String.format("\n  -> Approved applications: %d applications", approvedCount));
-        resultStr.append(String.format("\n  -> Approved applications exits: %d", exitedApprovedCount));
+        resultStr.append(String.format("\n  -> Approved application exits: %d", exitedApprovedCount));
         resultStr.append(String.format("\n  -> Rejected applications: %d applications", rejectedCount));
-        resultStr.append(String.format("\n  -> Rejected applications exits: %d", exitedRejectedCount));
+        resultStr.append(String.format("\n  -> Rejected application exits: %d", exitedRejectedCount));
         resultStr.append(String.format("\n  -> Average time in system: %.2f minutes.\n", avgTimeInSystem));
 
-        // Service Point performances
-        resultStr.append("\n****** Service Point Performances ******");
-        for (int i = 0; i < servicePoints.length; i++) {
-            ServicePoint servicePoint = servicePoints[i];
-            boolean isBottleneck = (servicePoint == bottleneck);
-
-            double utilization = servicePoint.getUtilization(Clock.getInstance().getTime());
-            String utilizationStr = String.format("%.2f%%", utilization);
-
-            resultStr.append(String.format("\nService Point %d \"%s\" Metrics:", i + 1, servicePoint.getServicePointName(), isBottleneck ? " <-- BOTTLENECK" : ""));
-            resultStr.append(String.format("\n  -> Total departures: %d applications.", servicePoint.getTotalDepartures()));
-            resultStr.append(String.format("\n  -> Average waiting time: %s minutes", servicePoint.getAverageWaitingTime()));
-            resultStr.append(String.format("\n  -> Max queue length: %d applications", servicePoint.getMaxQueueLength()));
-            resultStr.append(String.format("\n  -> Utilization: %s%s", utilization, isBottleneck ? "<-- HIGHEST" : ""));
-            resultStr.append(String.format("\n  -> Number of employees: %d", servicePoint.getNumEmployees()));
+        // --- 9. Service Point performances ---
+        for (ServicePoint sp : servicePoints) {
+            boolean isBottleneck = sp == bottleneck;
+            resultStr.append(String.format("\nService Point \"%s\" Metrics%s:",
+                    sp.getServicePointName(),
+                    isBottleneck ? " <-- BOTTLENECK" : ""));
+            resultStr.append(String.format("\n  -> Total departures: %d applications.", sp.getTotalDepartures()));
+            resultStr.append(String.format("\n  -> Average waiting time: %.2f minutes", sp.getAverageWaitingTime()));
+            resultStr.append(String.format("\n  -> Max queue length: %d applications", sp.getMaxQueueLength()));
+            resultStr.append(String.format("\n  -> Utilization: %.2f%s", sp.getUtilization(Clock.getInstance().getTime()), isBottleneck ? " <-- HIGHEST" : ""));
+            resultStr.append(String.format("\n  -> Number of employees: %d", sp.getNumEmployees()));
             resultStr.append("\n");
         }
 
-        // Bottleneck summary line
+        // --- 10. Bottleneck summary ---
         if (bottleneck != null) {
             resultStr.append("\n****** Bottleneck Summary ******");
             resultStr.append(String.format("\nBottleneck Service Point: \"%s\"", bottleneck.getServicePointName()));
             resultStr.append(String.format("\n  -> Utilization: %.2f%%", bottleneck.getUtilization(Clock.getInstance().getTime())));
             resultStr.append(String.format("\n  -> Max queue length: %d", bottleneck.getMaxQueueLength()));
             resultStr.append(String.format("\n  -> Average waiting time: %.2f minutes", bottleneck.getAverageWaitingTime()));
+            resultStr.append(String.format("Total applications found in ApplicationAsCustomer.getAllApplications(): "
+                    + ApplicationAsCustomer.getAllApplications().size()));
+
         }
 
-        // Send the results to the GUI for display
+        // --- 11. Send results to GUI ---
         controller.displayResults(resultStr.toString());
-
-        // for controller simulation result panel
         controller.showEndTime(Clock.getInstance().getTime());
+
+        ApplicationAsCustomer.resetIdCounter();
     }
 }

@@ -6,7 +6,9 @@ import simu.framework.Event;
 import simu.framework.EventList;
 import controller.IControllerMtoV;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 public class ServicePoint {
 
@@ -120,6 +122,10 @@ public class ServicePoint {
 
     public int getQueueSize() {
         return queue.size();
+    }
+
+    public synchronized List<ApplicationAsCustomer> getQueueSnapshot() {
+        return Collections.unmodifiableList(new LinkedList<>(queue));
     }
 
     // Metrics
