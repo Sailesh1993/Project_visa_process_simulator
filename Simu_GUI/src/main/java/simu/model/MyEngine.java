@@ -258,7 +258,7 @@ public class MyEngine extends Engine {
 
         // --- 7. Persist everything atomically ---
         SimulationRunDao dao = new SimulationRunDao();
-        dao.persistChildren(run, configs, spResults, logs);
+        dao.persist(run, configs, spResults, logs);
 
         // --- 8. Build simulation results string ---
         StringBuilder resultStr = new StringBuilder();
@@ -293,7 +293,7 @@ public class MyEngine extends Engine {
             resultStr.append(String.format("\n  -> Utilization: %.2f%%", bottleneck.getUtilization(Clock.getInstance().getTime())));
             resultStr.append(String.format("\n  -> Max queue length: %d", bottleneck.getMaxQueueLength()));
             resultStr.append(String.format("\n  -> Average waiting time: %.2f minutes", bottleneck.getAverageWaitingTime()));
-            resultStr.append(String.format("Total applications found in ApplicationAsCustomer.getAllApplications(): "
+            resultStr.append(String.format("\nfound in ApplicationAsCustomer.getAllApplications(): "
                     + ApplicationAsCustomer.getAllApplications().size()));
 
         }
