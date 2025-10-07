@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #ECF0F1;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MVC.controller.Simulation_Controller">
+<BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #ECF0F1;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MVC.controller.SimulationController">
 
     <!-- Top: Menu Bar & Title -->
     <top>
