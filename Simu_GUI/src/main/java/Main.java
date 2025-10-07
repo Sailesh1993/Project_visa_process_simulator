@@ -1,5 +1,5 @@
 import javafx.application.Application;
-import view.HomeView;
+import MVC.view.HomeView;
 
 public class Main {
     public static void main(String[] args) {
