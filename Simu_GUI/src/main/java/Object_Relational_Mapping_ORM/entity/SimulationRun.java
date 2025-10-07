@@ -32,10 +32,10 @@ public class SimulationRun {
     @Column(name = "Saved_config")
     private boolean configSaved;
 
-    @OneToMany(mappedBy = "simulationRun")
+    @OneToMany(mappedBy = "simulationRun", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DistConfig> distributionConfigs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "simulationRun")
+    @OneToMany(mappedBy = "simulationRun", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SPResult> servicePointResults = new ArrayList<>();
 
     @OneToMany(mappedBy = "simulationRun", cascade = CascadeType.ALL, orphanRemoval = true)
