@@ -73,8 +73,8 @@ public class Controller implements IControllerVtoM, IControllerMtoV {
     @Override
     public void updateStatistics(int totalApps, int approved, int rejected, double avgTime, double currentTime) {
         Platform.runLater(() -> {
-            if (ui instanceof Simulation_Controller) {
-                ((Simulation_Controller) ui).updateStatistics(totalApps, approved, rejected, avgTime, currentTime);
+            if (ui instanceof SimulationController) {
+                ((SimulationController) ui).updateStatistics(totalApps, approved, rejected, avgTime, currentTime);
             }
         });
     }
