@@ -1,6 +1,7 @@
 package MVC.view;
 
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -115,8 +116,8 @@ public class SimulatorUI extends Canvas implements IVisualisation {
             // Count actual customers at this SP - 100% accuracy
             int queueCount = customersAtSP[i].size();
 
-            // GREEN if queue is 0, RED if queue >= 1
-            Color color = (queueCount == 0) ? Color.web("#27AE60") : Color.web("#E74C3C");
+            // GREEN if queue <= 10, RED if queue > 10
+            Color color = (queueCount <= 10) ? Color.web("#27AE60") : Color.web("#E74C3C");
 
             gc.setFill(color);
             gc.fillRect(x - 30, y - 30, 60, 60);
@@ -127,11 +128,8 @@ public class SimulatorUI extends Canvas implements IVisualisation {
             gc.setFill(Color.WHITE);
             gc.setFont(new Font("Arial Bold", 10));
             String[] parts = names[i].split(": ");
-            gc.fillText(parts[0], x - 20, y - 5);
-            if (parts.length > 1) gc.fillText(parts[1], x - 20, y + 10);
-
-            gc.setFont(new Font("Arial", 8));
-            gc.fillText(queueCount > 0 ? "BUSY" : "FREE", x - 18, y + 25);
+            gc.fillText(parts[0], x - 20, y - 10);
+            if (parts.length > 1) gc.fillText(parts[1], x - 20, y + 5);
 
             gc.setFont(new Font("Arial", 9));
             gc.fillText("Q:" + queueCount, x - 18, y - 36);
@@ -140,11 +138,14 @@ public class SimulatorUI extends Canvas implements IVisualisation {
 
     private void drawCustomers() {
         for (AnimatedCustomer c : allCustomers) {
-            gc.setFill(c.approved ? Color.web("#27AE60") : Color.web("#F39C12"));
-            gc.fillOval(c.x - 6, c.y - 6, 12, 12);
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(1);
-            gc.strokeOval(c.x - 6, c.y - 6, 12, 12);
+            // draw bubbles that are moving
+            if (c.moving) {
+                gc.setFill(c.approved ? Color.web("#27AE60") : Color.web("#F39C12"));
+                gc.fillOval(c.x - 6, c.y - 6, 12, 12);
+                gc.setStroke(Color.BLACK);
+                gc.setLineWidth(1);
+                gc.strokeOval(c.x - 6, c.y - 6, 12, 12);
+            }
         }
     }
 
@@ -152,7 +153,6 @@ public class SimulatorUI extends Canvas implements IVisualisation {
         gc.setFill(Color.web("#2C3E50"));
         gc.setFont(new Font("Arial Bold", 16));
         gc.fillText("Total Applications: " + customerCount, 20, 30);
-
         drawLegend();
     }
 
@@ -162,10 +162,10 @@ public class SimulatorUI extends Canvas implements IVisualisation {
 
         // Background box
         gc.setFill(Color.web("#FFFFFF"));
-        gc.fillRect(centerX - 220, legendY - 10, 440, 50);
+        gc.fillRect(centerX - 190, legendY - 15, 440, 50);
         gc.setStroke(Color.web("#2C3E50"));
         gc.setLineWidth(2);
-        gc.strokeRect(centerX - 220, legendY - 10, 440, 50);
+        gc.strokeRect(centerX - 190, legendY - 15, 440, 50);
 
         // Green service point
         gc.setFill(Color.web("#27AE60"));
@@ -175,7 +175,7 @@ public class SimulatorUI extends Canvas implements IVisualisation {
         gc.strokeRect(centerX - 150, legendY - 5, 25, 25);
         gc.setFont(new Font("Arial", 11));
         gc.setFill(Color.web("#2C3E50"));
-        gc.fillText("Queue (Free)", centerX - 120, legendY + 12);
+        gc.fillText("Service Point (Free)", centerX - 120, legendY + 12);
 
         // Red service point
         gc.setFill(Color.web("#E74C3C"));
@@ -184,7 +184,7 @@ public class SimulatorUI extends Canvas implements IVisualisation {
         gc.setLineWidth(1);
         gc.strokeRect(centerX - 10, legendY - 5, 25, 25);
         gc.setFill(Color.web("#2C3E50"));
-        gc.fillText("Queue (Busy)", centerX + 20, legendY + 12);
+        gc.fillText("Service Point (Busy)", centerX + 20, legendY + 12);
 
         // Application bubble
         gc.setFill(Color.web("#F39C12"));
@@ -224,7 +224,7 @@ public class SimulatorUI extends Canvas implements IVisualisation {
             customersAtSP[i].clear();
         }
 
-        // Count customers at each SP (those that have arrived and stopped moving)
+        // Count customers at each SP
         for (AnimatedCustomer c : allCustomers) {
             if (!c.moving && c.toSp >= 0 && c.toSp < 6) {
                 customersAtSP[c.toSp].add(c);
@@ -235,53 +235,57 @@ public class SimulatorUI extends Canvas implements IVisualisation {
     // ---------- IVisualisation ----------
     @Override
     public void newCustomer() {
-        customerCount++;
-        AnimatedCustomer c = new AnimatedCustomer(30, 200);
-        c.toSp = 0;
-        c.setTarget(SP_POSITIONS[0][0], SP_POSITIONS[0][1]);
-        allCustomers.add(c);
+        Platform.runLater(() -> {
+            customerCount++;
+            AnimatedCustomer c = new AnimatedCustomer(30, 200);
+            c.toSp = 0;
+            c.setTarget(SP_POSITIONS[0][0], SP_POSITIONS[0][1]);
+            allCustomers.add(c);
+        });
     }
 
     @Override
     public void updateServicePointQueue(int spId, int size) {
-        // Not needed - we count actual bubbles
+
     }
 
     @Override
     public void moveCustomer(int fromSP, int toSP, boolean isApproved) {
         // Find a customer at fromSP and move them
-        AnimatedCustomer customerToMove = null;
+        Platform.runLater(() -> {
+            AnimatedCustomer customerToMove = null;
 
-        if (fromSP >= 0 && fromSP < 6) {
-            // Find customer at this SP
-            for (AnimatedCustomer c : allCustomers) {
-                if (!c.moving && c.toSp == fromSP) {
-                    customerToMove = c;
-                    break;
+            if (fromSP >= 0 && fromSP < 6) {
+                // Find customer at this SP
+                for (AnimatedCustomer c : allCustomers) {
+                    if (!c.moving && c.toSp == fromSP) {
+                        customerToMove = c;
+                        break;
+                    }
                 }
             }
-        }
 
-        // If we didn't find one, create a new one (shouldn't happen normally)
-        if (customerToMove == null) {
-            double startX = (fromSP >= 0 && fromSP < 6) ? SP_POSITIONS[fromSP][0] : 30;
-            double startY = (fromSP >= 0 && fromSP < 6) ? SP_POSITIONS[fromSP][1] : 200;
-            customerToMove = new AnimatedCustomer(startX, startY);
-            allCustomers.add(customerToMove);
-        }
+            // If we didn't find one, create a new one
+            if (customerToMove == null) {
+                double startX = (fromSP >= 0 && fromSP < 6) ? SP_POSITIONS[fromSP][0] : 30;
+                double startY = (fromSP >= 0 && fromSP < 6) ? SP_POSITIONS[fromSP][1] : 200;
+                customerToMove = new AnimatedCustomer(startX, startY);
+                allCustomers.add(customerToMove);
+            }
 
-        customerToMove.approved = isApproved;
-        customerToMove.fromSp = fromSP;
-        customerToMove.toSp = toSP;
-        customerToMove.moving = true;
+            customerToMove.approved = isApproved;
+            customerToMove.fromSp = fromSP;
+            customerToMove.toSp = toSP;
+            customerToMove.moving = true;
 
-        if (toSP == -1) {
-            // Exiting system
-            customerToMove.setTarget(1350, 200);
-        } else if (toSP >= 0 && toSP < 6) {
-            // Moving to next service point
-            customerToMove.setTarget(SP_POSITIONS[toSP][0], SP_POSITIONS[toSP][1]);
-        }
+            if (toSP == -1) {
+                // Exiting system
+                customerToMove.setTarget(1350, 200);
+            } else if (toSP >= 0 && toSP < 6) {
+                // Moving to next service point
+                customerToMove.setTarget(SP_POSITIONS[toSP][0], SP_POSITIONS[toSP][1]);
+            }
+        });
     }
 
     @Override

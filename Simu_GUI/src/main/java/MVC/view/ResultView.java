@@ -1,13 +1,13 @@
 package MVC.view;
 
-import MVC.controller.Results_Controller;
+import MVC.controller.ResultsController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class ResultView {
 
-    public static Results_Controller show(Stage stage) throws Exception {
+    public static ResultsController show(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(ResultView.class.getResource("/fxml/results.fxml"));
         Scene scene = new Scene(loader.load());
         stage.setScene(scene);

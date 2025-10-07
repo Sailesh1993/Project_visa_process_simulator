@@ -1,6 +1,6 @@
 package MVC.view;
 
-import MVC.controller.Simulation_Controller;
+import MVC.controller.SimulationController;
 import eduni.project_distributionconfiguration.DistributionConfig;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -14,7 +14,7 @@ public class SimulationView {
         Scene scene = new Scene(loader.load());
 
         // Get MVC.controller and initialize it
-        Simulation_Controller controller = loader.getController();
+        SimulationController controller = loader.getController();
         controller.initialize(simTime, delay, seed, configs);
 
         stage.setScene(scene);
