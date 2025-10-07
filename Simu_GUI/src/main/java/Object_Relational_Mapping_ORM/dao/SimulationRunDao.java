@@ -102,23 +102,32 @@ public class SimulationRunDao {
         }
     }
 
-
     public void deleteById(Long id) {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
-
         try {
             em.getTransaction().begin();
+
             SimulationRun run = em.find(SimulationRun.class, id);
-            if (run != null) {
-                em.remove(run);
+            if (run == null) {
+                System.out.println("No SimulationRun found with ID " + id);
+                em.getTransaction().commit();
+                return;
             }
+
+            // Explicitly clear child relationships (optional, helps Hibernate clean up)
+            if (run.getServicePointResults() != null) run.getServicePointResults().clear();
+            if (run.getDistConfiguration() != null) run.getDistConfiguration().clear();
+            if (run.getApplicationLogs() != null) run.getApplicationLogs().clear();
+
+            em.remove(run);
             em.getTransaction().commit();
+
+            System.out.println("Deleted SimulationRun ID: " + id);
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to delete run #" + id, e);
+            throw new RuntimeException("Failed to delete SimulationRun #" + id, e);
         } finally {
             em.close();
         }
     }
-
 }
