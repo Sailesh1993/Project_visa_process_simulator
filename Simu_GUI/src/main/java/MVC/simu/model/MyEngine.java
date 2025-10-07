@@ -5,6 +5,7 @@ import Object_Relational_Mapping_ORM.dao.SimulationRunDao;
 import eduni.project_distributionconfiguration.DistributionConfig;
 import Object_Relational_Mapping_ORM.entity.*;
 import MVC.simu.framework.*;
+import javafx.application.Platform;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -66,31 +67,38 @@ public class MyEngine extends Engine {
                 boolean docsComplete = randomGenerator.nextDouble() < 0.8;
                 ApplicationAsCustomer app = new ApplicationAsCustomer(isNew, docsComplete);
                 servicePoints[0].addQueue(app);
-                controller.updateQueueStatus(0, servicePoints[0].getQueueSize());
-                controller.visualiseCustomer();
+                Platform.runLater(() -> {
+                            controller.updateQueueStatus(0, servicePoints[0].getQueueSize());
+                            controller.visualiseCustomer();
+                        });
                 arrivalProcess.generateNext();
             }
             case END_APPLICATION_ENTRY -> {
                 application = servicePoints[0].removeQueue();
                 if (application != null) {
                     application.setCurrentStage(EventType.END_DOC_SUBMISSION);
-                    controller.getVisualisation().moveCustomer(0, 1, false);
                     servicePoints[1].addQueue(application);
+                    Platform.runLater(() -> {
+                        controller.getVisualisation().moveCustomer(0, 1, false);
+                        controller.updateQueueStatus(0, servicePoints[0].getQueueSize());
+                    });
+                } else {
+                    Platform.runLater(() -> controller.updateQueueStatus(0, servicePoints[0].getQueueSize()));
                 }
-                controller.updateQueueStatus(0, servicePoints[0].getQueueSize());
             }
+
             case END_DOC_SUBMISSION -> {
                 application = servicePoints[1].removeQueue();
                 if (application != null) {
                     if (application.requiresBiometrics()) {
-                        controller.getVisualisation().moveCustomer(1, 2, false);
                         servicePoints[2].addQueue(application);
+                        Platform.runLater(() -> {controller.getVisualisation().moveCustomer(1, 2, false);});
                     } else if (!application.isDocsComplete()) {
-                        controller.getVisualisation().moveCustomer(1, 3, false);
                         servicePoints[3].addQueue(application);
+                        Platform.runLater(() -> {controller.getVisualisation().moveCustomer(1, 3, false);});
                     } else {
-                        controller.getVisualisation().moveCustomer(1, 4, false);
                         servicePoints[4].addQueue(application);
+                        Platform.runLater(() -> {controller.getVisualisation().moveCustomer(1, 4, false); });
                     }
                 }
                 controller.updateQueueStatus(1, servicePoints[1].getQueueSize());
@@ -98,28 +106,28 @@ public class MyEngine extends Engine {
             case END_BIOMETRICS -> {
                 application = servicePoints[2].removeQueue();
                 if (application != null) {
-                    controller.getVisualisation().moveCustomer(2, 4, false);
                     double timeInBiometrics = Clock.getInstance().getTime() - application.getTimeEnteredQueue();
                     application.setTimeInBiometrics(timeInBiometrics);
                     servicePoints[4].addQueue(application);
+                    Platform.runLater(() -> {controller.getVisualisation().moveCustomer(2, 4, false);});
                 }
-                controller.updateQueueStatus(2, servicePoints[2].getQueueSize());
+                Platform.runLater(() -> {controller.updateQueueStatus(2, servicePoints[2].getQueueSize());});
             }
             case MISSING_DOCS_RESOLVED -> {
                 application = servicePoints[3].removeQueue();
                 if (application != null) {
-                    controller.getVisualisation().moveCustomer(3, 4, false);
                     servicePoints[4].addQueue(application);
+                    Platform.runLater(() -> {controller.getVisualisation().moveCustomer(3, 4, false);});
                 }
-                controller.updateQueueStatus(3, servicePoints[3].getQueueSize());
+                Platform.runLater(() -> {controller.updateQueueStatus(3, servicePoints[3].getQueueSize());});
             }
             case END_DOC_CHECK -> {
                 application = servicePoints[4].removeQueue();
                 if (application != null) {
-                    controller.getVisualisation().moveCustomer(4, 5, false);
                     servicePoints[5].addQueue(application);
+                    Platform.runLater(() -> {controller.getVisualisation().moveCustomer(4, 5, false);});
                 }
-                controller.updateQueueStatus(4, servicePoints[4].getQueueSize());
+                Platform.runLater(() -> {controller.updateQueueStatus(4, servicePoints[4].getQueueSize());});
             }
             case END_DECISION -> {
                 application = servicePoints[5].removeQueue();
@@ -128,7 +136,7 @@ public class MyEngine extends Engine {
                 application.setRemovalTime(Clock.getInstance().getTime());
                 boolean approved = randomGenerator.nextDouble() < 0.7;
                 application.setApproved(approved);
-                controller.getVisualisation().moveCustomer(5, -1, approved);
+                Platform.runLater(() -> {controller.getVisualisation().moveCustomer(5, -1, approved);});
 
                 // Increment counters
                 totalApplications++;
@@ -138,7 +146,7 @@ public class MyEngine extends Engine {
                 totalSystemTime += application.getRemovalTime() - application.getArrivalTime();
 
                 double avgTime = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
-                controller.updateStatistics(totalApplications, approvedCount, rejectedCount, avgTime, Clock.getInstance().getTime());
+                Platform.runLater(() -> {controller.updateStatistics(totalApplications, approvedCount, rejectedCount, avgTime, Clock.getInstance().getTime());});
 
                 application.reportResults();
 
@@ -150,7 +158,7 @@ public class MyEngine extends Engine {
                 } else {
                     eventList.add(new Event(EventType.EXIT_APPROVED, Clock.getInstance().getTime()));
                 }
-                controller.updateQueueStatus(5, servicePoints[5].getQueueSize());
+                Platform.runLater(() -> {controller.updateQueueStatus(5, servicePoints[5].getQueueSize());});
             }
             case EXIT_APPROVED -> exitedApprovedCount++;
             case EXIT_REJECTED -> exitedRejectedCount++;
@@ -242,7 +250,7 @@ public class MyEngine extends Engine {
         // 4️⃣ Prepare ApplicationLog entities (new part)
         List<ApplicationLog> logs = new ArrayList<>();
         for (ApplicationAsCustomer app : ApplicationAsCustomer.getAllApplications()) {
-             // only completed apps
+            // only completed apps
             ApplicationLog log = new ApplicationLog(
                     app.getId(),
                     app.getArrivalTime(),
@@ -299,9 +307,10 @@ public class MyEngine extends Engine {
         }
 
         // --- 11. Send results to GUI ---
+        Platform.runLater(() -> {
         controller.displayResults(resultStr.toString());
         controller.showEndTime(Clock.getInstance().getTime());
-
+    });
         ApplicationAsCustomer.resetIdCounter();
     }
 }
