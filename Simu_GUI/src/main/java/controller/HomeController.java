@@ -268,7 +268,7 @@ public class HomeController {
 
         double param1 = Double.parseDouble(param1Str);
         if (param1 <= 0) {
-            throw new IllegalArgumentException(name + ": Parameter 1 must be positive");
+            throw new IllegalArgumentException(name + ": Parameter 1 must be greater than 0");
         }
 
         if ((type.equals("Normal") || type.equals("Gamma")) && param2Str.isEmpty()) {
@@ -278,7 +278,7 @@ public class HomeController {
         if (!param2Str.isEmpty()) {
             double param2 = Double.parseDouble(param2Str);
             if (param2 <= 0) {
-                throw new IllegalArgumentException(name + ": Parameter 2 must be positive");
+                throw new IllegalArgumentException(name + ": Parameter 2 must be greater than 0");
             }
         }
     }
@@ -316,7 +316,7 @@ public class HomeController {
             Stage stage = (Stage) startButton.getScene().getWindow();
             SimulationView.show(stage, simTime, delay, seed, configs);
         } catch (Exception e) {
-            showError("Navigation Error", "Failed to load simulation page: " + e.getMessage());
+            showError("Navigation Error!", "Failed to load simulation page: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -325,7 +325,7 @@ public class HomeController {
     private void handleLoadRun() {
         SimulationRun selectedRun = recentRunsTable.getSelectionModel().getSelectedItem();
         if (selectedRun == null) {
-            showWarning("No Selection", "Please select a simulation run to view.");
+            showWarning("No Selection!", "Please select a simulation-run to view.");
             return;
         }
 
@@ -336,13 +336,13 @@ public class HomeController {
     private void handleDeleteRun() {
         SimulationRun selectedRun = recentRunsTable.getSelectionModel().getSelectedItem();
         if (selectedRun == null) {
-            showWarning("No Selection", "Please select a simulation run to delete.");
+            showWarning("No Selection!", "Please select a simulation-run to delete.");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Deletion");
-        confirm.setHeaderText("Delete Simulation Run #" + selectedRun.getId() + "?");
+        confirm.setTitle("Confirm Deletion!");
+        confirm.setHeaderText("Delete Simulation-Run #" + selectedRun.getId() + "?");
         confirm.setContentText("This action cannot be undone.");
 
         Optional<ButtonType> result = confirm.showAndWait();
@@ -350,9 +350,9 @@ public class HomeController {
             try {
                 dao.deleteById(selectedRun.getId());
                 loadRecentRuns();
-                showInfo("Deleted", "Simulation run deleted successfully.");
+                showInfo("Deleted.", "Simulation run deleted successfully.");
             } catch (Exception e) {
-                showError("Delete Failed", "Failed to delete simulation run: " + e.getMessage());
+                showError("Delete Failed!", "Failed to delete simulation run: " + e.getMessage());
             }
         }
     }
@@ -366,10 +366,10 @@ public class HomeController {
             ResultsController resultsController = ResultView.show(stage);
             resultsController.loadSimulationRun(runId);
 
-            stage.setTitle("Simulation Results");
+            stage.setTitle("***Simulation Results***");
 
         } catch (Exception e) {
-            showError("Navigation Error", "Failed to load results page: " + e.getMessage());
+            showError("Navigation Error!", "Failed to load results page: " + e.getMessage());
             e.printStackTrace();
         }
     }

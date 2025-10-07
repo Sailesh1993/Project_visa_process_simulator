@@ -77,7 +77,7 @@ public class SimulationController implements ISimulatorUI {
     }
 
     private void setupVisualization() {
-        visualisation = new Animation(1400, 550);
+        visualisation = new SimulatorUI(1400, 550);
 
         // Get the actual canvas from Visualisation2
         Canvas visCanvas = (Canvas) visualisation;
