@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-public class Home_Controller {
+public class HomeController {
 
     // Basic Parameters
     @FXML private TextField simulationTimeField;
@@ -363,7 +363,7 @@ public class Home_Controller {
             Stage stage = (Stage) startButton.getScene().getWindow();
 
             // Load results MVC.view and get MVC.controller
-            Results_Controller resultsController = ResultView.show(stage);
+            ResultsController resultsController = ResultView.show(stage);
             resultsController.loadSimulationRun(runId);
 
             stage.setTitle("***Simulation Results***");

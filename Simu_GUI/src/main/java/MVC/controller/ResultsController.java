@@ -16,7 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-public class Results_Controller {
+public class ResultsController {
 
     @FXML
     private ListView<String> runsListView;
@@ -208,7 +208,6 @@ public class Results_Controller {
         }
         loadSimulationRun(allRuns.get(index).getId());
         runsListView.getSelectionModel().select(index); // To load
-
     }
 
     @FXML
@@ -236,8 +235,6 @@ public class Results_Controller {
         });
     }
 
-
-
     @FXML
     private void navigateToHome() {
         try {
@@ -247,7 +244,6 @@ public class Results_Controller {
             showError("Navigation Error", e.getMessage());
         }
     }
-
 
     @FXML
     private void handleAbout() {

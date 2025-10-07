@@ -10,7 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import MVC.view.*;
 
-public class Simulation_Controller implements ISimulatorUI {
+public class SimulationController implements ISimulatorUI {
 
     // Top controls
     @FXML private Label simulationStatusLabel;
@@ -125,8 +125,6 @@ public class Simulation_Controller implements ISimulatorUI {
             simulationStatusLabel.setStyle("-fx-text-fill: #27AE60; -fx-font-weight: bold;");
             simulationRunning = false;
             simulationComplete = true;
-
-
         });
     }
 
@@ -253,7 +251,7 @@ public class Simulation_Controller implements ISimulatorUI {
     private void handleSpeedUp() {
         if (controller != null) {
             controller.increaseSpeed();
-            currentSpeed *= 1.1;
+            currentSpeed *= 0.9;
             Platform.runLater(() -> speedLabel.setText(String.format("%.1fx", currentSpeed)));
         }
     }
@@ -262,7 +260,7 @@ public class Simulation_Controller implements ISimulatorUI {
     private void handleSlowDown() {
         if (controller != null) {
             controller.decreaseSpeed();
-            currentSpeed *= 0.9;
+            currentSpeed *= 1.10;
             Platform.runLater(() -> speedLabel.setText(String.format("%.1fx", currentSpeed)));
         }
     }
@@ -318,15 +316,4 @@ public class Simulation_Controller implements ISimulatorUI {
             alert.showAndWait();
         });
     }
-
-    private void showInfo(String title, String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
-        });
-    }
-
 }
