@@ -78,7 +78,7 @@ public class SimulationRunDao {
     }
 
     public List<SimulationRun> findAll() {
-        EntityManager em = Object_Relational_Mapping_ORM.datasource.MariaDbJpaConnection.createEntityManager();
+        EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             TypedQuery<SimulationRun> q = em.createQuery(
                     "SELECT r FROM SimulationRun r ORDER BY r.timestamp DESC", SimulationRun.class);
@@ -88,14 +88,16 @@ public class SimulationRunDao {
         }
     }
 
-    public List<SimulationRun> findByName(String name) {
+    // Fetch all SimulationRun entities along with their associated distributionConfigs
+    public List<SimulationRun> findAllWithAssociations() {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             TypedQuery<SimulationRun> q = em.createQuery(
-                    "SELECT r FROM SimulationRun r WHERE r.runName LIKE :name ORDER BY r.timestamp DESC",
+                    "SELECT DISTINCT r FROM SimulationRun r " +
+                            "LEFT JOIN FETCH r.distributionConfigs " +
+                            "ORDER BY r.timestamp DESC",
                     SimulationRun.class
             );
-            q.setParameter("name", "%" + name + "%"); // partial match
             return q.getResultList();
         } finally {
             em.close();
@@ -104,28 +106,17 @@ public class SimulationRunDao {
 
     public void deleteById(Long id) {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
+
         try {
             em.getTransaction().begin();
-
             SimulationRun run = em.find(SimulationRun.class, id);
-            if (run == null) {
-                System.out.println("No SimulationRun found with ID " + id);
-                em.getTransaction().commit();
-                return;
+            if (run != null) {
+                em.remove(run);
             }
-
-            // Explicitly clear child relationships (optional, helps Hibernate clean up)
-            if (run.getServicePointResults() != null) run.getServicePointResults().clear();
-            if (run.getDistConfiguration() != null) run.getDistConfiguration().clear();
-            if (run.getApplicationLogs() != null) run.getApplicationLogs().clear();
-
-            em.remove(run);
             em.getTransaction().commit();
-
-            System.out.println("Deleted SimulationRun ID: " + id);
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to delete SimulationRun #" + id, e);
+            throw new RuntimeException("Failed to delete run #" + id, e);
         } finally {
             em.close();
         }

@@ -11,7 +11,7 @@ public class SimulationView {
     public static void show(Stage stage, double simTime, long delay, Long seed,
                             DistributionConfig[] configs) throws Exception {
         FXMLLoader loader = new FXMLLoader(SimulationView.class.getResource("/fxml/simulation.fxml"));
-        Scene scene = new Scene(loader.load());
+        Scene scene = new Scene(loader.load(),1550, 900);
 
         // Get MVC.controller and initialize it
         SimulationController controller = loader.getController();

@@ -1,3 +1,6 @@
+/**
+ * */
+
 package Object_Relational_Mapping_ORM.datasource;
 
 import jakarta.persistence.EntityManager;
@@ -26,17 +29,6 @@ public class MariaDbJpaConnection {
     public static EntityManager createEntityManager() {
         ensureFactory();
         return emf.createEntityManager();
-    }
-
-    /**
-     * Returns a shared EntityManager instance (lazy initialized).
-     */
-    public static synchronized EntityManager getInstance() {
-        ensureFactory();
-        if (em == null || !em.isOpen()) {
-            em = emf.createEntityManager();
-        }
-        return em;
     }
 
     /**

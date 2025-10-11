@@ -9,7 +9,7 @@ public class ResultView {
 
     public static ResultsController show(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(ResultView.class.getResource("/fxml/results.fxml"));
-        Scene scene = new Scene(loader.load());
+        Scene scene = new Scene(loader.load(),1550, 900);
         stage.setScene(scene);
         stage.setMaximized(true);
 

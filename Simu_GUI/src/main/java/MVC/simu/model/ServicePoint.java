@@ -7,12 +7,17 @@ import MVC.simu.framework.EventList;
 import MVC.controller.IControllerMtoV;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class ServicePoint {
 
     private LinkedList<ApplicationAsCustomer> queue = new LinkedList<>();
+    private LinkedList<ApplicationAsCustomer> inService = new LinkedList<>(); // holds customers currently being served
+    private Map<ApplicationAsCustomer, Double> serviceStartTimes = new HashMap<>(); // service start per customer
+
     private ContinuousGenerator generator;
     private EventList eventList;
     private EventType eventTypeScheduled;
@@ -23,7 +28,6 @@ public class ServicePoint {
     private double totalWaitingTime = 0.0;
     private int maxQueueLength = 0;
     private double busyTime = 0.0;
-    private double lastServiceStart = 0.0;
 
     // Multi-server tracking
     private int numEmployees = 5;
@@ -65,47 +69,63 @@ public class ServicePoint {
         beginService();
     }
 
+    /**
+     * Called by the engine when a service completion event for this SP occurs.
+     * Returns the application that completed service (pulled from inService list).
+     */
     public synchronized ApplicationAsCustomer removeQueue() {
-        if (queue.isEmpty()) return null;
+        if (inService.isEmpty()) return null;
 
-        ApplicationAsCustomer app = queue.poll();
+        ApplicationAsCustomer app = inService.poll();
         totalDepartures++;
 
         double now = Clock.getInstance().getTime();
-        if (lastServiceStart > 0) {
-            busyTime += now - lastServiceStart;
+
+        // accumulate busy time using the recorded service start time for this app
+        Double start = serviceStartTimes.remove(app);
+        if (start != null) {
+            busyTime += now - start;
         }
+
         busyServers = Math.max(0, busyServers - 1);
-        lastServiceStart = 0;
 
         updateControllerQueueStatus();
 
-        // Allow next waiting customer to start service if possible
+        // Allow next waiting customer(s) to start service if possible
         beginService();
 
         return app;
     }
 
+    /**
+     * Starts service for as many waiting customers as there are free employees.
+     * Moves customers from waiting queue -> inService and schedules completion events.
+     */
     public synchronized void beginService() {
+        double now = Clock.getInstance().getTime();
+
         while (busyServers < numEmployees && !queue.isEmpty()) {
-            ApplicationAsCustomer app = queue.poll();
+            ApplicationAsCustomer app = queue.poll(); // remove from waiting queue
             if (app == null) break;
 
             busyServers++;
 
             // Waiting time tracking
-            double waitingTime = Clock.getInstance().getTime() - app.getTimeEnteredQueue();
+            double waitingTime = now - app.getTimeEnteredQueue();
             totalWaitingTime += waitingTime;
             app.setTimeInWaitingRoom(waitingTime);
 
             maxQueueLength = Math.max(maxQueueLength, queue.size());
 
-            // Service time
+            // Service time (guard against zero)
             double serviceTime = Math.max(1e-6, generator.sample());
-            lastServiceStart = Clock.getInstance().getTime();
 
-            // Schedule service completion
-            eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getTime() + serviceTime));
+            // Track service start for utilization/busy-time calculation and put into in-service list
+            serviceStartTimes.put(app, now);
+            inService.add(app);
+
+            // Schedule service completion event for this service point (no direct app reference in Event)
+            eventList.add(new Event(eventTypeScheduled, now + serviceTime));
         }
 
         updateControllerQueueStatus();

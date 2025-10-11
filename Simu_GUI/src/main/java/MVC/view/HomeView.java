@@ -25,7 +25,7 @@ public class HomeView extends Application {
     // Single method for loading - used by both start() and navigation
     public static void show(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(HomeView.class.getResource("/fxml/welcome.fxml"));
-        Scene scene = new Scene(loader.load());
+        Scene scene = new Scene(loader.load(),1550, 900);
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.setTitle("Visa Application Processing Simulator");
