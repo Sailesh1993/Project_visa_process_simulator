@@ -1,9 +1,9 @@
 package MVC.controller;
 
-import Object_Relational_Mapping_ORM.dao.SimulationRunDao;
-import Object_Relational_Mapping_ORM.entity.DistConfig;
-import Object_Relational_Mapping_ORM.entity.SPResult;
-import Object_Relational_Mapping_ORM.entity.SimulationRun;
+import ORM.dao.*;
+import ORM.entity.DistConfig;
+import ORM.entity.SPResult;
+import ORM.entity.SimulationRun;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.chart.*;
@@ -17,79 +17,168 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for the results view in the Visa Application Processing Simulator.
+ * Handles loading, displaying, and analyzing simulation run results, including
+ * charts, tables, and bottleneck detection. Integrates with the DAO for data access
+ * and updates the UI using JavaFX components.
+ *
+ * <p>Features:
+ * <ul>
+ *   <li>Loads simulation runs and their results from the database</li>
+ *   <li>Displays run details, service point metrics, and bottleneck info</li>
+ *   <li>Provides interactive charts for analysis (bar, scatter, distribution)</li>
+ *   <li>Supports filtering and comparison by distribution type and metric</li>
+ *   <li>Handles run selection, deletion, and navigation</li>
+ * </ul>
+ * </p>
+ */
 public class ResultsController {
 
+    /** ListView for displaying simulation runs. */
     @FXML
     private ListView<String> runsListView;
+
+    /** Label for the run header (run number). */
     @FXML
     private Label runHeaderLabel;
+
+    /** Label for the run timestamp. */
     @FXML
     private Label runTimestampLabel;
+
+    /** Label for total applications processed in the run. */
     @FXML
     private Label totalAppsResultLabel;
+
+    /** Label for average system time in the run. */
     @FXML
     private Label avgSystemTimeResultLabel;
+
+    /** Label for approved applications count. */
     @FXML
     private Label approvedResultLabel;
+
+    /** Label for rejected applications count. */
     @FXML
     private Label rejectedResultLabel;
+
+    /** TableView for displaying service point results. */
     @FXML
     private TableView<SPResult> servicePointTable;
+
+    /** TableColumn for service point name. */
     @FXML
     private TableColumn<SPResult, String> spNameColumn;
+
+    /** TableColumn for departures count. */
     @FXML
     private TableColumn<SPResult, Integer> departuresColumn;
+
+    /** TableColumn for average waiting time. */
     @FXML
     private TableColumn<SPResult, Double> avgWaitColumn;
+
+    /** TableColumn for maximum queue length. */
     @FXML
     private TableColumn<SPResult, Integer> maxQueueColumn;
+
+    /** TableColumn for utilization percentage. */
     @FXML
     private TableColumn<SPResult, Double> utilizationColumn;
+
+    /** TableColumn for number of employees. */
     @FXML
     private TableColumn<SPResult, Integer> employeesColumn;
+
+    /** TableColumn for bottleneck indicator. */
     @FXML
     private TableColumn<SPResult, String> bottleneckColumn;
+
+    /** Panel for displaying bottleneck details. */
     @FXML
     private VBox bottleneckPanel;
+
+    /** Label for bottleneck service point name. */
     @FXML
     private Label bottleneckNameLabel;
+
+    /** Label for bottleneck utilization. */
     @FXML
     private Label bottleneckUtilLabel;
+
+    /** Label for bottleneck queue length. */
     @FXML
     private Label bottleneckQueueLabel;
+
+    /** Label for bottleneck waiting time. */
     @FXML
     private Label bottleneckWaitLabel;
 
-    // Combo box switching logic could be added here for different chart types
+    /** ComboBox for selecting analysis type. */
     @FXML private ComboBox<String> analysisTypeCombo;
+
+    /** BarChart for displaying analysis results. */
     @FXML private BarChart<String, Number> analysisBarChart;
 
-    //New: chart axes label
+    /** CategoryAxis for service point names in analysis chart. */
     @FXML private CategoryAxis analysisSPAxis;
+
+    /** NumberAxis for metric values in analysis chart. */
     @FXML private NumberAxis analysisYAxis;
 
-    // Distribution chart
+    /** BarChart for waiting time by distribution. */
     @FXML private BarChart<String, Number> waitByDistributionChart;
+
+    /** CategoryAxis for service point names in distribution chart. */
     @FXML private CategoryAxis waitByDistSPAxis;
+
+    /** NumberAxis for waiting time in distribution chart. */
     @FXML private NumberAxis waitByDistYAxis;
 
+    /** ComboBox for selecting distribution type. */
     @FXML private ComboBox<String> distributionTypeCombo;
+
+    /** BarChart for comparing metrics by distribution. */
     @FXML private BarChart<String, Number> compareByDistChart;
+
+    /** CategoryAxis for service point names in comparison chart. */
     @FXML private CategoryAxis compareByDistXAxis;
+
+    /** NumberAxis for metric values in comparison chart. */
     @FXML private NumberAxis compareByDistYAxis;
 
-    // New Scatter chart
+    /** ScatterChart for employee impact analysis. */
     @FXML private ScatterChart<Number, Number> employeeImpactChart;
+
+    /** NumberAxis for number of employees in scatter chart. */
     @FXML private NumberAxis employeeXAxis;
+
+    /** NumberAxis for utilization in scatter chart. */
     @FXML private NumberAxis utilizationYAxis;
 
+    /** ComboBox for selecting metric to compare. */
     @FXML private ComboBox<String> compareMetricCombo;
 
+    /** DAO for accessing simulation run data. */
+    private SimulationRunDao dao;
 
-    private SimulationRunDao dao = new SimulationRunDao();
+    private SimulationRunDao getDao() {
+        if (dao == null) {
+            dao = new SimulationRunDao();
+        }
+        return dao;
+    }
+    /** Currently selected simulation run. */
     private SimulationRun currentRun;
+
+    /** List of all loaded simulation runs. */
     private List<SimulationRun> allRuns;
 
+    /**
+     * Initializes the controller, sets up table columns, combo boxes, and loads runs.
+     * Populates UI elements and sets up event handlers for analysis and navigation.
+     */
     @FXML
     private void initialize() {
         setupTableColumns();
@@ -98,7 +187,6 @@ public class ResultsController {
         compareMetricCombo.getItems().setAll("Avg Waiting Time", "Utilization", "Max Queue");
         compareMetricCombo.setOnAction(e -> updateWaitByDistributionChart(currentRun));
         compareMetricCombo.getSelectionModel().selectFirst();
-        //distributionTypeCombo.setOnAction(e -> updateWaitByDistributionChart());
 
         analysisTypeCombo.getItems().addAll("Avg Wait Time", "Utilization", "Max Queue", "Wait by Distribution", "Employee Impact");
         analysisTypeCombo.setOnAction(e -> updateAnalysisBarChart());
@@ -116,12 +204,15 @@ public class ResultsController {
         // Select latest run
         if (!allRuns.isEmpty()) {
             runsListView.getSelectionModel().selectFirst();
-            //loadSimulationRun(allRuns.get(0).getId());
-            handleLoadRun(); // Use existing handler to ensure all logic is applied
+            handleLoadRun();
         }
     }
 
-    // New  helper method to gather all distribution types across all runs
+    /**
+     * Gathers all unique distribution types across all loaded simulation runs.
+     *
+     * @return Set of distribution type names
+     */
     private Set<String> getAllDistributionTypesAcrossRuns() {
         Set<String> allDists = new HashSet<>();
         for (SimulationRun run : allRuns) {
@@ -134,7 +225,10 @@ public class ResultsController {
         return allDists;
     }
 
-    // New method to gather all distribution types across all runs
+    /**
+     * Updates the comparison chart by distribution type and selected metric.
+     * Sets axis labels and populates chart data for the current run.
+     */
     private void updateCompareByDistribution() {
         compareByDistChart.getData().clear();
         String selectedDist = distributionTypeCombo.getValue();
@@ -183,7 +277,12 @@ public class ResultsController {
         compareByDistChart.setLegendVisible(true);
     }
 
-    // New method to gather all distribution types across all runs
+    /**
+     * Updates the bar chart that shows average waiting times per service point,
+     * grouped by distribution type, for the specified simulation run.
+     *
+     * @param run the simulation run to visualize
+     */
 
     private void updateWaitByDistributionChart(SimulationRun run) {
         waitByDistributionChart.getData().clear();
@@ -214,15 +313,17 @@ public class ResultsController {
         waitByDistYAxis.setLabel("Avg Waiting Time (min)");
     }
 
+    /**
+     * Updates the analysis chart based on the selected metric and the currently loaded simulation run.
+     * Displays either a bar chart or scatter chart depending on the analysis type.
+     */
     private void updateAnalysisBarChart() {
         if (currentRun == null) {
             analysisBarChart.getData().clear();
             employeeImpactChart.setVisible(false);
-            System.out.println("No current run selected.");
             return;
         }
         String selected = analysisTypeCombo.getValue();
-        System.out.println("Selected analysis: " + selected);
 
         analysisBarChart.setVisible(!"Employee Impact".equals(selected));
         employeeImpactChart.setVisible("Employee Impact".equals(selected));
@@ -231,7 +332,6 @@ public class ResultsController {
             employeeImpactChart.setVisible(true);
             analysisBarChart.setVisible(false);
             updateEmployeeImpactChart();
-            System.out.println("Showing Employee Impact chart.");
             return;
         }
 
@@ -358,7 +458,10 @@ public class ResultsController {
         analysisSPAxis.setTickLabelRotation(45);
     }
 
-    // New method to update the employee impact scatter chart
+    /**
+     * Updates the scatter chart showing the relationship between the number of employees
+     * and utilization for each service point in the current run.
+     */
     private void updateEmployeeImpactChart() {
         if (currentRun == null || currentRun.getServicePointResults() == null) {
             employeeImpactChart.getData().clear();
@@ -399,6 +502,10 @@ public class ResultsController {
         utilizationYAxis.setTickUnit(10);
     }
 
+    /**
+     * Sets up table columns for the service point results table.
+     * Configures cell factories for formatting and bottleneck indication.
+     */
     private void setupTableColumns() {
         spNameColumn.setCellValueFactory(new PropertyValueFactory<>("servicePointName"));
         departuresColumn.setCellValueFactory(new PropertyValueFactory<>("departures"));
@@ -432,25 +539,42 @@ public class ResultsController {
                         cellData.getValue().isBottleneck() ? "🔴 BOTTLENECK" : ""));
     }
 
-    // New method to load all runs with eager fetching of distributions
+    /**
+     * Loads all simulation runs, sorts them by timestamp in descending order,
+     * formats them for display, and populates the run list view.
+     *
+     * <p>Skips invalid runs (null or missing ID/timestamp). Shows an error alert if loading fails.</p>
+     */
     private void loadAllRuns() {
         try {
-            // Use the eager loading method from your DAO
-            allRuns = dao.findAllWithAssociations();
+            allRuns = getDao().findAllWithAssociations();
             allRuns.sort(Comparator.comparing(SimulationRun::getTimestamp).reversed());
-            runsListView.setItems(FXCollections.observableArrayList(
-                    allRuns.stream()
-                            .map(run -> String.format("Run #%d - %s", run.getId(),
-                                    run.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
-                            .toList()));
+            List<String> runStrings = allRuns.stream()
+                    .map(run -> {
+                        if (run == null || run.getId() == null || run.getTimestamp() == null) {
+                            return null;
+                        }
+                        return String.format("Run #%d - %s", run.getId(),
+                                run.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                    })
+                    .filter(Objects::nonNull)
+                    .toList();
+            runsListView.setItems(FXCollections.observableArrayList(runStrings));
         } catch (Exception e) {
+            e.printStackTrace(); // Add this for debugging
             showError("Load Error", "Failed to load simulation runs: " + e.getMessage());
         }
     }
 
+
+    /**
+     * Loads a specific simulation run by ID and displays its results.
+     *
+     * @param runId ID of the simulation run to load
+     */
     public void loadSimulationRun(Long runId) {
         try {
-            currentRun = dao.find(runId);
+            currentRun = getDao().find(runId);
             if (currentRun == null) {
                 showError("Not Found", "Simulation run not found.");
                 return;
@@ -461,6 +585,10 @@ public class ResultsController {
         }
     }
 
+    /**
+     * Displays results for the currently loaded simulation run.
+     * Updates labels, tables, bottleneck panel, and analysis charts.
+     */
     private void displayRunResults() {
         runHeaderLabel.setText("Simulation Run #" + currentRun.getId());
         runTimestampLabel.setText(currentRun.getTimestamp().format(
@@ -495,6 +623,11 @@ public class ResultsController {
         updateAnalysisBarChart();
     }
 
+    /**
+     * Updates the comparison bar chart based on the selected distribution type and metric.
+     * Populates the chart with data from the currently selected simulation run.
+     */
+
     private void generateDetailedResults() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("SIMULATION RUN #%d\n", currentRun.getId()));
@@ -514,6 +647,10 @@ public class ResultsController {
         }
     }
 
+    /**
+     * Handles selection of a simulation run from the list view.
+     * Loads and displays the selected run.
+     */
     @FXML
     private void handleLoadRun() {
         int index = runsListView.getSelectionModel().getSelectedIndex();
@@ -528,6 +665,10 @@ public class ResultsController {
 
     }
 
+    /**
+     * Handles deletion of the selected simulation run.
+     * Prompts for confirmation and updates UI after deletion.
+     */
     @FXML
     private void handleDeleteRun() {
         int index = runsListView.getSelectionModel().getSelectedIndex();
@@ -543,7 +684,7 @@ public class ResultsController {
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    dao.deleteById(allRuns.get(index).getId());
+                    getDao().deleteById(allRuns.get(index).getId());
                     loadAllRuns();
                     showInfo("Deleted", "Simulation run deleted successfully.");
                 } catch (Exception e) {
@@ -553,6 +694,9 @@ public class ResultsController {
         });
     }
 
+    /**
+     * Navigates back to the home view.
+     */
     @FXML
     private void navigateToHome() {
         try {
@@ -563,19 +707,40 @@ public class ResultsController {
         }
     }
 
+    /**
+     * Displays information about the application.
+     */
     @FXML
     private void handleAbout() {
         showInfo("About", "Visa Application Processing Simulator v1.0\nDeveloped by Group 7");
     }
 
-    private void showError(String title, String message) {
+    /**
+     * Shows an error alert dialog.
+     *
+     * @param title Dialog title
+     * @param message Error message
+     */
+    protected void showError(String title, String message) {
         new Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait();
     }
 
-    private void showWarning(String title, String message) {
+    /**
+     * Shows a warning alert dialog.
+     *
+     * @param title Dialog title
+     * @param message Warning message
+     */
+    protected void showWarning(String title, String message) {
         new Alert(Alert.AlertType.WARNING, message, ButtonType.OK).showAndWait();
     }
 
+    /**
+     * Shows an informational alert dialog.
+     *
+     * @param title Dialog title
+     * @param message Information message
+     */
     private void showInfo(String title, String message) {
         new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait();
     }

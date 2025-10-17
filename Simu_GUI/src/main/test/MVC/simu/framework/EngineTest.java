@@ -3,7 +3,8 @@ package MVC.simu.framework;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class EngineFunctionalTest {
+@DisplayName("Class Engine Tests")
+class EngineTest {
 
     static class DummyEngine extends Engine {
         boolean initialized, ranEvent, resultsDone;
@@ -12,8 +13,10 @@ class EngineFunctionalTest {
 
         @Override
         protected void initialization() { initialized = true; }
+
         @Override
         protected void runEvent(Event t) { ranEvent = true; }
+
         @Override
         protected void results() { resultsDone = true; }
     }

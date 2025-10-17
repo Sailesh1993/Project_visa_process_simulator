@@ -40,4 +40,6 @@ build/
 ### Mac OS ###
 .DS_Store
 
-out/
+/out/
+/target/
+*.class

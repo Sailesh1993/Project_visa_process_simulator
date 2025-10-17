@@ -1,9 +1,9 @@
 package MVC.simu.model;
 
 import MVC.controller.IControllerMtoV;
-import Object_Relational_Mapping_ORM.dao.SimulationRunDao;
+import ORM.dao.SimulationRunDao;
 import eduni.project_distributionconfiguration.DistributionConfig;
-import Object_Relational_Mapping_ORM.entity.*;
+import ORM.entity.*;
 import MVC.simu.framework.*;
 import javafx.application.Platform;
 
@@ -12,22 +12,71 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The {@code MyEngine} class defines the main simulation logic
+ * for the visa application processing system.
+ * <p>
+ * It manages the flow of {@link ApplicationAsCustomer} objects through
+ * various {@link ServicePoint}s according to the events defined in
+ * {@link EventType}. It tracks statistics such as total processed
+ * applications, approvals, rejections, average time in system,
+ * and detects the system bottleneck.
+ * <p>
+ * At the end of the simulation, {@code MyEngine} persists all
+ * results using {@link SimulationRunDao} and updates the GUI through
+ * the {@link IControllerMtoV} controller.
+ */
+
 public class MyEngine extends Engine {
+
+    /** Manages the generation of new applications entering the system. */
     private ArrivalProcess arrivalProcess;
+
+    /** Array of all service points in the system, indexed 0 to 5. */
     private ServicePoint[] servicePoints;
+
+    /** Random number generator used for stochastic decisions (e.g., approval, docs completeness). */
     private Random randomGenerator;
+
+    /** Reference to the controller for updating the GUI and passing data. */
     private IControllerMtoV controller;
+
+    /** Array of user-defined distribution configurations for each service point and arrival process. */
     private DistributionConfig[] userConfigs;
 
-    // Counters
+    /** Probability that a new application is a first-time applicant. */
+    private static final double NEW_APPLICATION_PROBABILITY = 0.65;
+
+    /** Probability that an application has complete documents on arrival. */
+    private static final double DOCS_COMPLETE_PROBABILITY = 0.8;
+
+    // Simulation counters
+
+    /** Total number of applications processed by the system. */
     private int totalApplications = 0;
+
+    /** Number of applications approved by the system. */
     private int approvedCount = 0;
+
+    /** Number of applications rejected by the system. */
     private int rejectedCount = 0;
+
+    /** Cumulative time all applications spent in the system (for computing average). */
     private double totalSystemTime = 0.0;
 
+    /** Number of approved applications that exited the system. */
     private int exitedApprovedCount = 0;
+
+    /** Number of rejected applications that exited the system. */
     private int exitedRejectedCount = 0;
 
+    /**
+     * Constructs a new simulation engine instance.
+     *
+     * @param controller the controller used to update the GUI
+     * @param configs    the distribution configurations for each service point and the arrival process
+     * @param seed       optional random seed (if {@code null}, a system time–based seed is used)
+     */
     public MyEngine(IControllerMtoV controller, DistributionConfig[] configs, Long seed) {
         super(controller);
         Clock.getInstance().reset();
@@ -37,7 +86,7 @@ public class MyEngine extends Engine {
         servicePoints = new ServicePoint[6];
         randomGenerator = (seed != null) ? new Random(seed) : new Random(System.currentTimeMillis());
 
-        // Initialize service points
+        // Initialize all service points according to configuration
         servicePoints[0] = new ServicePoint(configs[0].buildGenerator(), eventList, EventType.END_APPLICATION_ENTRY, controller);
         servicePoints[1] = new ServicePoint(configs[1].buildGenerator(), eventList, EventType.END_DOC_SUBMISSION, controller);
         servicePoints[2] = new ServicePoint(configs[2].buildGenerator(), eventList, EventType.END_BIOMETRICS, controller);
@@ -45,26 +94,34 @@ public class MyEngine extends Engine {
         servicePoints[4] = new ServicePoint(configs[4].buildGenerator(), eventList, EventType.END_DOC_CHECK, controller);
         servicePoints[5] = new ServicePoint(configs[5].buildGenerator(), eventList, EventType.END_DECISION, controller);
 
-        // Arrival process
+        // Initialize arrival process
         arrivalProcess = new ArrivalProcess(configs[6].buildGenerator(), eventList, EventType.ARRIVAL);
     }
 
+    /**
+     * Initializes the simulation by scheduling the first arrival event.
+     */
     @Override
     protected void initialization() {
-       /* if (ApplicationAsCustomer.getAllApplications().isEmpty()) {
-            ApplicationAsCustomer.resetIdCounter();
-        }*/
         arrivalProcess.generateNext();
     }
 
-
+    /**
+     * Handles all event types that occur during the simulation run.
+     * This method defines how {@link ApplicationAsCustomer} objects
+     * move between service points and how outcomes (approval/rejection)
+     * are determined.
+     *
+     * @param t the event to process
+     */
     @Override
     protected void runEvent(Event t) {
         ApplicationAsCustomer application;
         switch ((EventType) t.getType()) {
             case ARRIVAL -> {
-                boolean isNew = randomGenerator.nextDouble() < 0.65;
-                boolean docsComplete = randomGenerator.nextDouble() < 0.8;
+                boolean isNew = randomGenerator.nextDouble() < NEW_APPLICATION_PROBABILITY;
+                boolean docsComplete = randomGenerator.nextDouble() < DOCS_COMPLETE_PROBABILITY;
+
                 ApplicationAsCustomer app = new ApplicationAsCustomer(isNew, docsComplete);
                 servicePoints[0].addQueue(app);
                 Platform.runLater(() -> {
@@ -165,20 +222,38 @@ public class MyEngine extends Engine {
         }
     }
 
+    /**
+     * Checks each {@link ServicePoint} for conditions that allow
+     * service to begin or a bottleneck to be detected.
+     * This is called repeatedly during the simulation loop.
+     */
     @Override
     protected void tryCEvents() {
         for (ServicePoint sp : servicePoints) {
-            if (!sp.isReserved() && sp.isOnQueue()) sp.beginService();
+            if (sp.isReserved() && sp.isOnQueue()) sp.beginService();
             sp.checkBottleneck();
         }
     }
 
+    /**
+     * Collects and persists the final simulation results at the end of each simulation run.
+     * <p>
+     * This includes:
+     * <ul>
+     *   <li>Computing overall statistics (approval rate, average time, exits)</li>
+     *   <li>Detecting the bottleneck service point</li>
+     *   <li>Persisting all entities ({@link SimulationRun}, {@link SPResult}, {@link DistConfig}, {@link ApplicationLog}) into the database</li>
+     *   <li>Building and displaying a summary report in the GUI</li>
+     * </ul>
+     */
     @Override
     protected void results() {
-        // --- 1. Calculate average system time ---
+        // Calculate average system time
         double avgTimeInSystem = totalApplications > 0 ? totalSystemTime / totalApplications : 0;
 
-        // --- 2. Create SimulationRun ---
+        // Create a SimulationRun entity representing this simulation run
+        // Sets local timestamp and aggregates key statistics (total applications, approvals, rejections, average system time)
+        // Each SimulationRun is persisted in the database with a primary key (runId) and displayed in the GUI
         SimulationRun run = new SimulationRun();
         run.setTimestamp(LocalDateTime.now());
         run.setTotalApplications(totalApplications);
@@ -187,7 +262,7 @@ public class MyEngine extends Engine {
         run.setAvgSystemTime(avgTimeInSystem);
         run.setConfigSaved(true);
 
-        // --- 3. Find bottleneck service point ---
+        // Find bottleneck service point
         ServicePoint bottleneck = null;
         double maxUtilization = 0.0;
         List<SPResult> spResults = new ArrayList<>();
@@ -199,7 +274,7 @@ public class MyEngine extends Engine {
             }
         }
 
-        // --- 4. Create ServicePointResults ---
+        // Prepare ServicePoint results
         for (ServicePoint sp : servicePoints) {
             boolean isBottleneck = (sp == bottleneck);
             SPResult spr = new SPResult(
@@ -215,16 +290,16 @@ public class MyEngine extends Engine {
             spResults.add(spr);
         }
 
-        // --- 5. Create DistributionConfigs ---
+        // Prepare DistributionConfigs entity
         List<DistConfig> configs = new ArrayList<>();
         for (int i = 0; i < servicePoints.length; i++) {
-            DistributionConfig ucfg = userConfigs[i];
+            DistributionConfig userDistConfig = userConfigs[i];
             DistConfig dc = new DistConfig();
             dc.setServicePointName(servicePoints[i].getServicePointName());
-            dc.setDistributionType(ucfg.getType());
-            dc.setParam1(ucfg.getParam1());
+            dc.setDistributionType(userDistConfig.getType());
+            dc.setParam1(userDistConfig.getParam1());
             try {
-                dc.setParam2(ucfg.getParam2());
+                dc.setParam2(userDistConfig.getParam2());
             } catch (Exception ignored) {
                 dc.setParam2(null);
             }
@@ -232,7 +307,7 @@ public class MyEngine extends Engine {
             configs.add(dc);
         }
 
-        // Arrival process config at index 6
+        // Prepare arrival process configuration
         DistributionConfig arrivalCfg = userConfigs[6];
         DistConfig arrivalDc = new DistConfig();
         arrivalDc.setServicePointName("Arrival Process");
@@ -246,8 +321,7 @@ public class MyEngine extends Engine {
         arrivalDc.setSimulationRun(run);
         configs.add(arrivalDc);
 
-        // --- 6. Create ApplicationLogs from all customers across service points ---
-        // 4️⃣ Prepare ApplicationLog entities (new part)
+        // Prepare Application logs
         List<ApplicationLog> logs = new ArrayList<>();
         for (ApplicationAsCustomer app : ApplicationAsCustomer.getAllApplications()) {
             // only completed apps
@@ -264,11 +338,11 @@ public class MyEngine extends Engine {
             logs.add(log);
         }
 
-        // --- 7. Persist everything atomically ---
+        // Persist all entities atomically
         SimulationRunDao dao = new SimulationRunDao();
         dao.persist(run, configs, spResults, logs);
 
-        // --- 8. Build simulation results string ---
+        // Build simulation results string
         StringBuilder resultStr = new StringBuilder();
         resultStr.append("\n*---------------------------------------------------------------------------------*");
         resultStr.append(String.format("\nSimulation ended at %.2f", Clock.getInstance().getTime()));
@@ -280,7 +354,7 @@ public class MyEngine extends Engine {
         resultStr.append(String.format("\n  -> Rejected application exits: %d", exitedRejectedCount));
         resultStr.append(String.format("\n  -> Average time in system: %.2f minutes.\n", avgTimeInSystem));
 
-        // --- 9. Service Point performances ---
+        // Service Point performances
         for (ServicePoint sp : servicePoints) {
             boolean isBottleneck = sp == bottleneck;
             resultStr.append(String.format("\nService Point \"%s\" Metrics%s:",
@@ -294,7 +368,7 @@ public class MyEngine extends Engine {
             resultStr.append("\n");
         }
 
-        // --- 10. Bottleneck summary ---
+        // Bottleneck summary
         if (bottleneck != null) {
             resultStr.append("\n****** Bottleneck Summary ******");
             resultStr.append(String.format("\nBottleneck Service Point: \"%s\"", bottleneck.getServicePointName()));
@@ -306,7 +380,7 @@ public class MyEngine extends Engine {
 
         }
 
-        // --- 11. Send results to GUI ---
+        // Send results to GUI
         Platform.runLater(() -> {
         controller.displayResults(resultStr.toString());
         controller.showEndTime(Clock.getInstance().getTime());
