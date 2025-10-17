@@ -13,6 +13,7 @@ target/
 *.iml
 *.ipr
 .idea/
+.idea/workspace.xm
 
 ### Eclipse ###
 .apt_generated
@@ -39,4 +40,6 @@ build/
 ### Mac OS ###
 .DS_Store
 
-out/
+/out/
+/target/
+*.class
