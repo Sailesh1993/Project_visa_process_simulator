@@ -161,10 +161,10 @@ public enum EventType implements IEventType {
      * <ul>
      *     <li>0: SP1 - Application Entry & Appointment Booking</li>
      *     <li>1: SP2 - Document Submission Room</li>
-     *     <li>2: SP2a - Biometrics Room</li>
-     *     <li>3: SP2b - Missing Docs Waiting Room</li>
-     *     <li>4: SP3 - Document Check Room</li>
-     *     <li>5: SP4 - Decision Room</li>
+     *     <li>2: SP3 - Biometrics Room</li>
+     *     <li>3: SP4 - Missing Docs Waiting Room</li>
+     *     <li>4: SP5 - Document Check Room</li>
+     *     <li>5: SP6 - Decision Room</li>
      * </ul>
      *
      * @return the service point index (0-5) if associated, or -1 if not associated with a specific service point
@@ -173,10 +173,10 @@ public enum EventType implements IEventType {
         return switch (this) {
             case END_APPLICATION_ENTRY -> 0; // SP1
             case END_DOC_SUBMISSION -> 1;    // SP2
-            case END_BIOMETRICS -> 2;        // SP2a
-            case MISSING_DOCS_RESOLVED -> 3; // SP2b
-            case END_DOC_CHECK -> 4;         // SP3
-            case END_DECISION -> 5;          // SP4
+            case END_BIOMETRICS -> 2;        // SP3
+            case MISSING_DOCS_RESOLVED -> 3; // SP4
+            case END_DOC_CHECK -> 4;         // SP5
+            case END_DECISION -> 5;          // SP6
             default -> -1;                   // Not associated
         };
     }
@@ -186,11 +186,11 @@ public enum EventType implements IEventType {
      */
     private static final String[] SERVICE_POINT_NAMES = {
             "Application Entry & Appointment Booking", // SP1
-            "Document Submission Room",                // SP2
-            "Biometrics Room",                         // SP2a
-            "Missing Docs Waiting Room",               // SP2b
-            "Document Check Room",                     // SP3
-            "Decision Room"                            // SP4
+            "Document Submission Department",                // SP2
+            "Biometrics Department",                         // SP3
+            "Missing Docs Waiting Department",               // SP4
+            "Document Check Department",                     // SP5
+            "Decision Department"                            // SP6
     };
 
     /**
