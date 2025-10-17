@@ -11,7 +11,7 @@ The project is implemented using Object-Oriented Programming (OOP) principles in
 following the Model–View–Controller (MVC) design pattern. The system integrates JavaFX 
 for the graphical user interface, SceneBuilder for GUI layout design, JUnit5 for testing, 
 and JPA (Jakarta Persistence API) with MariaDB as the database layer for storing simulation results and configurations.
----
+
 
 ### 🏃‍♂️ Simulation Flow Overview
 ```
@@ -109,12 +109,12 @@ src/main/java/
 │   └── logback.xml/ 📜                          # Logging configuration
 │
 ├── test/
-│   ├── controller/                            # Controller classes for testing
-│   ├── simu/framework/                        # Engine class test
-│   ├── simu/model/                            # MyEngine class test
-│   └── view/                                  # GUI animation test
+│   ├── controller/                              # Controller classes for testing
+│   ├── simu/framework/                          # Engine class test
+│   ├── simu/model/                              # MyEngine class test
+│   └── view/                                    # GUI animation test
 │ 
-└── pom.xml                                    # Maven dependencies
+└── pom.xml                                      # Maven dependencies
 ```
 ---
 
