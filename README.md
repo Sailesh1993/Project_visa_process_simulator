@@ -41,26 +41,27 @@ and JPA (Jakarta Persistence API) with MariaDB as the database layer for storing
         └─ Rejected → May reapply up to 3 times before permanent removal from the system
 ```  
 ```  
-        [SP1 🏢 Online Application & Arrival]
-         │
-         ▼
-[SP2 🏢 Registration Desk]
-         │
- ┌───────┴─────────┐
- │                 │
- ▼                 ▼
-[SP3 🏢 Biometrics]   [SP4 🏢 Missing Documents Queue]
- │                     │
- ▼                     ▼
-[SP5 🏢 Document Check]
-         │
-         ▼
-[SP6 🏢 Decision Desk]
- ┌──────────┴───────────┐
- │                      │
- ▼                      ▼
-Approved ✔             Rejected ❌
-(Exit)                 (Reapply ≤3)
+             [SP1 🏢 Application Entry & Appointment Booking]
+                                  │
+                                  ▼
+                [SP2 🏢 Document Submission Department]
+                                  │
+                     ┌────────────┴───────────┐
+                     │                        │
+                     ▼                        ▼
+[SP3 🏢 Biometrics Department]           [SP4 🏢 Missing Documents Queue]
+                     │                            │
+                     ▼                            ▼
+                    [SP5 🏢 Document Check Department]
+                                  │
+                                  ▼
+                    [SP6 🏢 Decision Department]
+                                  │
+                       ┌──────────┴───────────┐
+                       │                      │
+                       ▼                      ▼
+                   Approved ✔             Rejected ❌
+                     (Exit)               (Reapply ≤3)
 
 ```
 ---
