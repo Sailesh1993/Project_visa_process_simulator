@@ -12,6 +12,7 @@ following the Model–View–Controller (MVC) design pattern. The system integra
 for the graphical user interface, SceneBuilder for GUI layout design, JUnit5 for testing, 
 and JPA (Jakarta Persistence API) with MariaDB as the database layer for storing simulation results and configurations.
 ---
+
 ### 🏃‍♂️ Simulation Flow Overview
 ```
 🏢 SP1 – Application Entry & Appointment Booking
