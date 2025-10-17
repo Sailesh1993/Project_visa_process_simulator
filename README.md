@@ -86,7 +86,8 @@ and JPA (Jakarta Persistence API) with MariaDB as the database layer for storing
 ## 🏗️ Project Architecture
 The project follows a modular MVC + ORM architecture:
 ```
-src/main/java/
+Simu_GUI/
+├── src/main/java/
 ├── eduni/ 
 │   ├── distributions/ ⚛️                        # Probability distribution classes
 │   └── project_distributionconfiguration/ 📊    # Contains configurations for specific statistical distribution (Normal, Exponential, or Gamma)
