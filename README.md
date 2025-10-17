@@ -195,9 +195,9 @@ Sandip Ranjit – Project Manager + code + test + documentation
 
 Dinal Maha Vidanelage – Code + test + documentation
 
-Sailesh Karki – Code + teste + documentation
+Sailesh Karki – Code + test + documentation
 
-Twe He Gam Aung – Code + teste + documentation
+Twe He Gam Aung – Code + test + documentation
 
 ---
 
