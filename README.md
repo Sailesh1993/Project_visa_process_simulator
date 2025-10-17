@@ -46,9 +46,9 @@ and JPA (Jakarta Persistence API) with MariaDB as the database layer for storing
                                   ▼
                 [SP2 🏢 Document Submission Department]
                                   │
-                     ┌────────────┴───────────┐
-                     │                        │
-                     ▼                        ▼
+                     ┌────────────┴───────────────┐
+                     │                            │
+                     ▼                            ▼
 [SP3 🏢 Biometrics Department]           [SP4 🏢 Missing Documents Queue]
                      │                            │
                      ▼                            ▼
