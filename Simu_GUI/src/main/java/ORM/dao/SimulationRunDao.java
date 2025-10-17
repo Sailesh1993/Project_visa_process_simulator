@@ -1,19 +1,35 @@
-package Object_Relational_Mapping_ORM.dao;
+package ORM.dao;
 
-import Object_Relational_Mapping_ORM.datasource.MariaDbJpaConnection;
-import Object_Relational_Mapping_ORM.entity.ApplicationLog;
-import Object_Relational_Mapping_ORM.entity.DistConfig;
-import Object_Relational_Mapping_ORM.entity.SimulationRun;
-import Object_Relational_Mapping_ORM.entity.SPResult;
+import ORM.datasource.MariaDbJpaConnection;
+import ORM.entity.ApplicationLog;
+import ORM.entity.DistConfig;
+import ORM.entity.SimulationRun;
+import ORM.entity.SPResult;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
+/**
+ * Data Access Object for {@link SimulationRun} and its related entities.
+ * <p>
+ * Provides methods to persist, find, and delete simulation runs along with
+ * their associated distribution configurations, service point results, and application logs.
+ * </p>
+ */
 public class SimulationRunDao {
 
     /**
-     * Persist a SimulationRun and its related entities (distConfigs, spResults, logs) atomically.
+     * Persist a {@link SimulationRun} and its associated entities atomically.
+     * <p>
+     * Links {@link DistConfig}, {@link SPResult}, and {@link ApplicationLog} entities
+     * to the parent simulation run before persisting.
+     *
+     * @param run       the simulation run to persist
+     * @param configs   distribution configurations related to the run
+     * @param spResults service point results related to the run
+     * @param logs      application logs related to the run
+     * @throws RuntimeException if persistence fails
      */
     public void persist(SimulationRun run,
                         List<DistConfig> configs,
@@ -60,6 +76,14 @@ public class SimulationRunDao {
         }
     }
 
+    /**
+     * Find a {@link SimulationRun} by its ID.
+     * <p>
+     * Ensures that all related collections are loaded.
+     *
+     * @param id the primary key of the simulation run
+     * @return the SimulationRun, or {@code null} if not found
+     */
     public SimulationRun find(Long id) {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
@@ -77,6 +101,11 @@ public class SimulationRunDao {
         }
     }
 
+    /**
+     * Retrieve all {@link SimulationRun} entities, ordered by timestamp descending.
+     *
+     * @return list of all simulation runs
+     */
     public List<SimulationRun> findAll() {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
@@ -88,7 +117,12 @@ public class SimulationRunDao {
         }
     }
 
-    // Fetch all SimulationRun entities along with their associated distributionConfigs
+    /**
+     * Retrieve all {@link SimulationRun} entities along with their associated
+     * {@link DistConfig} entities.
+     *
+     * @return list of simulation runs with distributions fetched
+     */
     public List<SimulationRun> findAllWithAssociations() {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
@@ -104,6 +138,12 @@ public class SimulationRunDao {
         }
     }
 
+    /**
+     * Delete a {@link SimulationRun} by its ID.
+     *
+     * @param id the primary key of the simulation run to delete
+     * @throws RuntimeException if deletion fails
+     */
     public void deleteById(Long id) {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
 
