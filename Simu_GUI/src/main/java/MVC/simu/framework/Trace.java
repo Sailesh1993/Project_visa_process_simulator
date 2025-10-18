@@ -12,7 +12,14 @@ public class Trace {
     /**
      * Defines available levels of tracing detail.
      */
-	public enum Level { INFO, WAR, ERR }
+	public enum Level {
+        /** Informational messages */
+        INFO,
+        /** Warning messages */
+        WAR,
+        /** Error messages */
+        ERR
+    }
 
 	private static Level traceLevel;
 
