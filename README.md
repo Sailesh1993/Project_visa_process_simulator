@@ -42,24 +42,24 @@ and JPA (Jakarta Persistence API) with MariaDB as the database layer for storing
 ```  
 ```  
              [SP1 🏢 Application Entry & Appointment Booking]
-                                  │
-                                  ▼
+                                   │
+                                   ▼
                 [SP2 🏢 Document Submission Department]
-                                  │
-                     ┌────────────┴───────────────┐
-                     │                            │
-                     ▼                            ▼
-[SP3 🏢 Biometrics Department]           [SP4 🏢 Missing Documents Queue]
-                     │                            │
-                     ▼                            ▼
+                                   │
+                     ┌─────────────┴───────────────┐
+                     │             │               │
+                     ▼             │               ▼
+[SP3 🏢 Biometrics Department]     │    [SP4 🏢 Missing Documents Queue]
+                     │             │               │
+                     ▼             ▼               ▼
                     [SP5 🏢 Document Check Department]
-                                  │
-                                  ▼
+                                   │
+                                   ▼
                     [SP6 🏢 Decision Department]
-                                  │
-                       ┌──────────┴───────────┐
-                       │                      │
-                       ▼                      ▼
+                                   │
+                       ┌───────────┴───────────┐
+                       │                       │
+                       ▼                       ▼
                    Approved ✔             Rejected ❌
                      (Exit)               (Reapply ≤3)
 
@@ -103,7 +103,7 @@ Simu_GUI/
 │   ├── datasource/ 💾                           # Singleton for managing JPA connections to MariaDB database
 │   └── entity/ 🧱                               # JPA entity mappings (SimulationRun, SPResult, DistConfig, ApplicationLog)
 │
-├── Main.java 🚀                                 # Main class to launch the simulation
+├── main 🚀                                      # Main.java class to launch the simulation
 │ 
 ├── resources/
 │   ├── FXML/ 🗂️                                 # JavaFX FXML files for Scenebuilder
