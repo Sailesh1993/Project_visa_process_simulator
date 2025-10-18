@@ -94,7 +94,7 @@ public abstract class Engine extends Thread implements IEngine {
 	}
 
     /**
-     * Main simulation loop.
+     * main.Main simulation loop.
      * <p>
      * Initializes the simulation, then repeatedly processes events
      * until the simulation time limit is reached or no events remain.
