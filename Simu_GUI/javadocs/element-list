@@ -1,0 +1,10 @@
+eduni.distributions
+eduni.project_distributionconfiguration
+main
+MVC.controller
+MVC.simu.framework
+MVC.simu.model
+MVC.view
+ORM.dao
+ORM.datasource
+ORM.entity

@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"eduni.distributions"},{"l":"eduni.project_distributionconfiguration"},{"l":"main"},{"l":"MVC.controller"},{"l":"MVC.simu.framework"},{"l":"MVC.simu.model"},{"l":"MVC.view"},{"l":"ORM.dao"},{"l":"ORM.datasource"},{"l":"ORM.entity"}];updateSearchResults();
